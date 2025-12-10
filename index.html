@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão Multi-Loja</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        #app {
+            /* Garantir que o app ocupe a altura total para a tela de login */
+            min-height: 100vh;
+        }
+        /* Garantir que o scroll X funcione em dispositivos touch (melhorando a rolagem em tabelas) */
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+        }
+        /* Estilos para a animação do Toast */
+        .toast-enter {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        .toast-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+        .toast-leave-active {
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease-in, transform 0.3s ease-in;
+        }
+    </style>
+</head>
+<body class="font-sans">
+
+<div id="app" class="flex flex-col">
+    </div>
+
+<script>
+    // =========================================================
+    // 1. ESTADO DA APLICAÇÃO (ADICIONADO ESTADO PARA SIDEBAR)
+    // =========================================================
+    let appState = {
+        lojas: [
+            { id: 1, nome: 'Loja 1 - Centro', endereco: 'Rua Principal, 100' },
+            { id: 2, nome: 'Loja 2 - Shopping', endereco: 'Av. das Nações, 500' },
+            { id: 3, nome: 'Loja 3 - Bairro Sul', endereco: 'Rua do Comércio, 30' }
+        ],
+        usuarioLogado: null,
+        telaAtiva: 'login',
+        produtos: [
+            { id: 1, nome: 'Coca-Cola 350ml', categoria: 'bebidas', preco: 5.00 },
+            { id: 2, nome: 'Guaraná 2L', categoria: 'bebidas', preco: 8.50 },
+            { id: 3, nome: 'Água Mineral', categoria: 'bebidas', preco: 3.00 },
+            { id: 4, nome: 'Hambúrguer', categoria: 'cardapio', preco: 25.00 },
+            { id: 5, nome: 'Pizza Grande', categoria: 'cardapio', preco: 45.00 },
+            { id: 6, nome: 'Batata Frita', categoria: 'cardapio', preco: 12.00 }
+        ],
+        estoqueLojas: [
+            { produtoId: 1, lojaId: 1, quantidade: 25 },
+            { produtoId: 2, lojaId: 1, quantidade: 10 },
+            { produtoId: 3, lojaId: 1, quantidade: 50 },
+            { produtoId: 4, lojaId: 1, quantidade: 10 },
+            { produtoId: 5, lojaId: 1, quantidade: 5 },
+            { produtoId: 6, lojaId: 1, quantidade: 10 },
+            { produtoId: 1, lojaId: 2, quantidade: 15 },
+            { produtoId: 2, lojaId: 2, quantidade: 20 },
+            { produtoId: 3, lojaId: 2, quantidade: 50 },
+            { produtoId: 4, lojaId: 2, quantidade: 10 },
+            { produtoId: 5, lojaId: 2, quantidade: 5 },
+            { produtoId: 6, lojaId: 2, quantidade: 10 },
+            { produtoId: 1, lojaId: 3, quantidade: 10 },
+            { produtoId: 2, lojaId: 3, quantidade: 0 },
+            { produtoId: 3, lojaId: 3, quantidade: 50 },
+            { produtoId: 4, lojaId: 3, quantidade: 10 },
+            { produtoId: 5, lojaId: 3, quantidade: 5 },
+            { produtoId: 6, lojaId: 3, quantidade: 10 }
+        ],
+        vendas: [],
+        carrinho: [],
+        usuarios: {
+            vendedor: { usuario: 'vendedor', senha: '123', nome: 'João Vendedor', nivel: 'vendedor', lojasPermitidas: [1, 2] },
+            senior: { usuario: 'senior', senha: '123', nome: 'Maria Gerente', nivel: 'senior', lojasPermitidas: [1, 2, 3] }
+        },
+        relatorioPeriodo: 'mensal',
+        dataInicioFiltro: '',
+        dataFimFiltro: '',
+        modalProduto: {
+            aberto: false,
+            dados: null
+        },
+        modalUsuario: {
+            aberto: false,
+            dados: null
+        },
+        modalLoja: {
+            aberto: false,
+            dados: null
+        },
+        // Estado para Notificações Toast
+        toast: {
+            visivel: false,
+            mensagem: '',
+            tipo: 'success', // 'success', 'error', 'info'
+            timeoutId: null
+        },
+        // NOVO: Estado para a responsividade da Sidebar
+        sidebarOpen: false 
+    };
+
+    const appContainer = document.getElementById('app');
+
+    // =========================================================
+    // 2. FUNÇÕES DE UTILIDADE E AUXILIARES
+    // =========================================================
+
+    // NOVO: Função para alternar a Sidebar
+    function toggleSidebar() {
+        appState.sidebarOpen = !appState.sidebarOpen;
+        renderApp();
+    }
+    
+    // NOVO: Função para exibir o Toast
+    function showToast(mensagem, tipo = 'success') {
+        clearTimeout(appState.toast.timeoutId);
+        
+        appState.toast.mensagem = mensagem;
+        appState.toast.tipo = tipo;
+        appState.toast.visivel = true;
+        
+        // Renderiza apenas o toast e não o app inteiro para melhor performance visual
+        renderToast();
+        
+        // Esconde o toast após 3 segundos
+        appState.toast.timeoutId = setTimeout(() => {
+            appState.toast.visivel = false;
+            renderToast(); // Renderiza novamente para remover
+        }, 3000);
+    }
+
+    function getEstoqueLoja(produtoId, lojaId) {
+        const itemEstoque = appState.estoqueLojas.find(
+            item => item.produtoId === produtoId && item.lojaId === lojaId
+        );
+        return itemEstoque ? itemEstoque.quantidade : 0;
+    }
+
+    const getIcon = (name, className = "w-6 h-6") => {
+        const icons = {
+            Coffee: `<path d="M10 2v2"/><path d="M14 2v2"/><path d="M8 6h8c1.7 0 3 1.3 3 3v8c0 1.7-1.3 3-3 3H8c-1.7 0-3-1.3-3-3V9c0-1.7 1.3-3 3-3z"/><path d="M21 6h-3"/><path d="M5 6H3"/><path d="M12 18v2"/>`,
+            Package: `<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>`,
+            DollarSign: `<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>`,
+            TrendingUp: `<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>`,
+            FileText: `<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>`,
+            LogOut: `<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>`,
+            ShoppingCart: `<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.72a2 2 0 0 0 2-1.58L23 6H6"/>`,
+            CreditCard: `<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><line x1="7" y1="15" x2="11" y2="15"/>`,
+            Wallet: `<path d="M3 5v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5"/><line x1="22" y1="12" x2="16" y2="12"/>`,
+            Users: `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`,
+            Edit: `<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>`,
+            Trash2: `<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>`,
+            Plus: `<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>`,
+            X: `<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>`,
+            MapPin: `<path d="M20 10c0 6-8 15-8 15s-8-9-8-15a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>`,
+            Store: `<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>`,
+            CheckCircle: `<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`,
+            AlertTriangle: `<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/>`,
+            Info: `<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>`,
+            Menu: `<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>` // Novo ícone de menu
+        };
+        const svgPath = icons[name] || '';
+        return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}">${svgPath}</svg>`;
+    };
+
+    const formatCurrency = (value) => {
+        return `€ ${value.toFixed(2).replace('.', ',')}`;
+    };
+
+    // =========================================================
+    // 3. FUNÇÕES DE FLUXO E AUTENTICAÇÃO
+    // =========================================================
+
+    function fazerLogin(usuario, senha) {
+        const user = Object.values(appState.usuarios).find(u => u.usuario === usuario && u.senha === senha);
+        if (user) {
+            appState.usuarioLogado = user;
+
+            if (user.nivel === 'vendedor') {
+                const lojasDoVendedor = appState.lojas.filter(l => user.lojasPermitidas.includes(l.id));
+
+                if (lojasDoVendedor.length === 1) {
+                    appState.usuarioLogado.lojaSelecionada = lojasDoVendedor[0];
+                    appState.telaAtiva = 'vendas';
+                    showToast(`Bem-vindo, ${user.nome}! Você está logado na ${lojasDoVendedor[0].nome}.`, 'success');
+                } else if (lojasDoVendedor.length > 1) {
+                    appState.telaAtiva = 'selecaoLoja';
+                    showToast(`Bem-vindo, ${user.nome}! Selecione uma loja para começar.`, 'info');
+                } else {
+                    showToast('Usuário vendedor sem lojas cadastradas!', 'error');
+                    appState.usuarioLogado = null;
+                    appState.telaAtiva = 'login';
+                }
+            } else {
+                appState.telaAtiva = 'dashboard';
+                showToast(`Bem-vindo(a), Gerente ${user.nome}!`, 'success');
+            }
+        } else {
+            showToast('Usuário ou senha incorretos!', 'error');
+        }
+        appState.sidebarOpen = false; // Fecha a sidebar ao logar
+        renderApp();
+    }
+
+    function selecionarLoja(lojaId) {
+        const loja = appState.lojas.find(l => l.id === lojaId);
+        if (loja && appState.usuarioLogado.lojasPermitidas.includes(loja.id)) {
+            appState.usuarioLogado.lojaSelecionada = loja;
+            appState.telaAtiva = 'vendas';
+            showToast(`Loja alterada para ${loja.nome}.`, 'info');
+        }
+        renderApp();
+    }
+
+    function fazerLogout() {
+        showToast('Sessão encerrada com sucesso.', 'info');
+        appState.usuarioLogado = null;
+        appState.telaAtiva = 'login';
+        appState.carrinho = [];
+        appState.sidebarOpen = false;
+        renderApp();
+    }
+
+    function mudarTela(novaTela) {
+        appState.telaAtiva = novaTela;
+        appState.sidebarOpen = false; // Fecha a sidebar ao mudar de tela (em mobile)
+        renderApp();
+    }
+
+    // =========================================================
+    // 4. FUNÇÕES DE VENDAS
+    // =========================================================
+
+    function adicionarAoCarrinho(produtoId) {
+        if (!appState.usuarioLogado || !appState.usuarioLogado.lojaSelecionada) {
+            showToast('Por favor, selecione uma loja para iniciar as vendas.', 'error');
+            return;
+        }
+        const produto = appState.produtos.find(p => p.id === produtoId);
+        const lojaId = appState.usuarioLogado.lojaSelecionada.id;
+
+        const estoqueAtual = getEstoqueLoja(produtoId, lojaId);
+
+        if (!produto || estoqueAtual === 0) {
+            showToast('Estoque esgotado na loja selecionada!', 'error');
+            return;
+        }
+
+        const itemExistente = appState.carrinho.find(item => item.id === produtoId);
+
+        if (itemExistente) {
+            if (itemExistente.quantidade + 1 > estoqueAtual) {
+                showToast('Estoque insuficiente para adicionar mais uma unidade!', 'error');
+                return;
+            }
+
+            appState.carrinho = appState.carrinho.map(item =>
+                item.id === produtoId ? { ...item, quantidade: item.quantidade + 1 } : item
+            );
+        } else {
+            appState.carrinho = [...appState.carrinho, { ...produto, quantidade: 1 }];
+        }
+        // Não é necessário showToast, pois o carrinho é atualizado visualmente
+        renderApp();
+    }
+
+    function removerDoCarrinho(produtoId) {
+        appState.carrinho = appState.carrinho.filter(item => item.id !== produtoId);
+        renderApp();
+    }
+
+    function finalizarVenda(formaPagamento) {
+        if (appState.carrinho.length === 0) {
+            showToast('Carrinho vazio!', 'error');
+            return;
+        }
+
+        const lojaSelecionada = appState.usuarioLogado.lojaSelecionada;
+        if (!lojaSelecionada) {
+            showToast('Erro: Loja não selecionada.', 'error');
+            return;
+        }
+
+        const lojaId = lojaSelecionada.id;
+        const total = appState.carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+
+        // 1. DÁ BAIXA NO ESTOQUE DA LOJA CORRETA
+        const novoEstoqueLojas = appState.estoqueLojas.map(itemEstoque => {
+            const itemVendido = appState.carrinho.find(i => i.id === itemEstoque.produtoId);
+
+            if (itemVendido && itemEstoque.lojaId === lojaId) {
+                return {
+                    ...itemEstoque,
+                    quantidade: itemEstoque.quantidade - itemVendido.quantidade
+                };
+            }
+            return itemEstoque;
+        });
+
+        // 2. CRIA O REGISTRO DA VENDA
+        const novaVenda = {
+            id: appState.vendas.length + 1,
+            data: new Date().toISOString(),
+            itens: appState.carrinho,
+            total,
+            formaPagamento,
+            vendedor: appState.usuarioLogado.nome,
+            loja: lojaSelecionada.nome
+        };
+
+        appState.estoqueLojas = novoEstoqueLojas;
+        appState.vendas = [...appState.vendas, novaVenda];
+        appState.carrinho = [];
+
+        showToast(`Venda de ${formatCurrency(total)} finalizada com sucesso!`, 'success');
+        renderApp();
+    }
+
+    // =========================================================
+    // 5. FUNÇÕES DE RELATÓRIO
+    // =========================================================
+
+    function calcularRelatorio(periodo) {
+        // ... (Lógica de Relatório inalterada)
+        const agora = new Date();
+        let vendasFiltradas = appState.vendas;
+
+        if (appState.usuarioLogado.nivel === 'vendedor' && appState.usuarioLogado.lojaSelecionada) {
+            vendasFiltradas = vendasFiltradas.filter(v => v.loja === appState.usuarioLogado.lojaSelecionada.nome);
+        }
+
+        // Lógica de filtro por data (mantida)
+        if (periodo === 'personalizado') {
+            if (appState.dataInicioFiltro && appState.dataFimFiltro) {
+                const inicio = new Date(appState.dataInicioFiltro);
+                const fim = new Date(appState.dataFimFiltro);
+                fim.setHours(23, 59, 59, 999);
+
+                vendasFiltradas = vendasFiltradas.filter(v => {
+                    const dataVenda = new Date(v.data);
+                    return dataVenda >= inicio && dataVenda <= fim;
+                });
+            }
+        } else if (periodo === 'diario') {
+            vendasFiltradas = vendasFiltradas.filter(v => {
+                const dataVenda = new Date(v.data);
+                return dataVenda.toDateString() === agora.toDateString();
+            });
+        } else if (periodo === 'mensal') {
+            vendasFiltradas = vendasFiltradas.filter(v => {
+                const dataVenda = new Date(v.data);
+                return dataVenda.getMonth() === agora.getMonth() &&
+                       dataVenda.getFullYear() === agora.getFullYear();
+            });
+        } else if (periodo === 'anual') {
+            vendasFiltradas = vendasFiltradas.filter(v => {
+                const dataVenda = new Date(v.data);
+                return dataVenda.getFullYear() === agora.getFullYear();
+            });
+        }
+
+        const totalGeral = vendasFiltradas.reduce((sum, v) => sum + v.total, 0);
+        const totalCartao = vendasFiltradas.filter(v => v.formaPagamento === 'cartao')
+                                             .reduce((sum, v) => sum + v.total, 0);
+        const totalDinheiro = vendasFiltradas.filter(v => v.formaPagamento === 'dinheiro')
+                                             .reduce((sum, v) => sum + v.total, 0);
+
+        return { vendasFiltradas, totalGeral, totalCartao, totalDinheiro, quantidade: vendasFiltradas.length };
+    }
+
+    function setRelatorioPeriodo(periodo) {
+        appState.relatorioPeriodo = periodo;
+        if (periodo !== 'personalizado') {
+            appState.dataInicioFiltro = '';
+            appState.dataFimFiltro = '';
+        }
+        renderApp();
+    }
+
+    function setDataFiltro(tipo, valor) {
+        if (tipo === 'inicio') {
+            appState.dataInicioFiltro = valor;
+        } else {
+            appState.dataFimFiltro = valor;
+        }
+        if (appState.dataInicioFiltro && appState.dataFimFiltro) {
+            appState.relatorioPeriodo = 'personalizado';
+            renderApp();
+        }
+    }
+
+
+    // =========================================================
+    // 6. MODAIS E FUNÇÕES DE GERENCIAMENTO
+    // =========================================================
+
+    // FUNÇÕES DE PRODUTO
+    function abrirModalProduto(id = null) {
+        // ... (Lógica inalterada)
+        const produtoBase = id 
+            ? appState.produtos.find(p => p.id === id)
+            : { id: null, nome: '', categoria: 'bebidas', preco: 0 };
+            
+        const estoqueDetalhe = {};
+        
+        appState.lojas.forEach(loja => {
+            estoqueDetalhe[loja.id] = id ? getEstoqueLoja(id, loja.id) : 0;
+        });
+
+        appState.modalProduto = {
+            aberto: true,
+            dados: { 
+                ...produtoBase, 
+                estoqueDetalhe,
+                novoProduto: id === null
+            }
+        };
+        renderApp();
+    }
+
+    function fecharModalProduto() {
+        appState.modalProduto = { aberto: false, dados: null };
+        renderApp();
+    }
+    
+    function atualizarEstoqueModal(lojaId, quantidade) {
+        if (appState.modalProduto.aberto && appState.modalProduto.dados) {
+            const novosDados = JSON.parse(JSON.stringify(appState.modalProduto.dados));
+            novosDados.estoqueDetalhe[lojaId] = parseInt(quantidade, 10) || 0;
+            appState.modalProduto.dados = novosDados;
+        }
+    }
+
+    function salvarProduto(event) {
+        event.preventDefault();
+        const form = event.target;
+        const nome = form.querySelector('#prodNome').value;
+        const categoria = form.querySelector('#prodCategoria').value;
+        const preco = parseFloat(form.querySelector('#prodPreco').value);
+        
+        if (!nome || preco < 0 || isNaN(preco)) {
+            showToast('Preencha os dados básicos corretamente.', 'error');
+            return;
+        }
+
+        const estoqueDetalhe = appState.modalProduto.dados.estoqueDetalhe;
+        let produtoId;
+        
+        const isNew = appState.modalProduto.dados.id === null;
+
+        if (!isNew) {
+            // Edição de Produto
+            produtoId = appState.modalProduto.dados.id;
+            appState.produtos = appState.produtos.map(p =>
+                p.id === produtoId
+                ? { ...p, nome, categoria, preco }
+                : p
+            );
+        } else {
+            // Novo Produto
+            produtoId = appState.produtos.length > 0 ? Math.max(...appState.produtos.map(p => p.id)) + 1 : 1;
+            const novoProduto = { id: produtoId, nome, categoria, preco };
+            appState.produtos.push(novoProduto);
+        }
+
+        // SALVA/ATUALIZA O ESTOQUE
+        const novoEstoqueLojas = [...appState.estoqueLojas];
+        
+        appState.lojas.forEach(loja => {
+            const quantidade = estoqueDetalhe[loja.id] || 0;
+            const estoqueIndex = novoEstoqueLojas.findIndex(
+                item => item.produtoId === produtoId && item.lojaId === loja.id
+            );
+            
+            if (estoqueIndex !== -1) {
+                novoEstoqueLojas[estoqueIndex].quantidade = quantidade;
+            } else if (quantidade > 0) {
+                novoEstoqueLojas.push({ produtoId, lojaId: loja.id, quantidade });
+            }
+        });
+
+        appState.estoqueLojas = novoEstoqueLojas.filter(item => item.quantidade >= 0);
+
+        fecharModalProduto();
+        showToast(`Produto ${nome} ${isNew ? 'adicionado' : 'atualizado'} com sucesso!`, 'success');
+        renderApp();
+    }
+
+    function excluirProduto(id) {
+        if (confirm('Tem certeza que deseja excluir este produto? Isso removerá o estoque em todas as lojas.')) {
+            const produtoNome = appState.produtos.find(p => p.id === id)?.nome || 'Produto';
+            appState.produtos = appState.produtos.filter(p => p.id !== id);
+            appState.estoqueLojas = appState.estoqueLojas.filter(item => item.produtoId !== id);
+            showToast(`${produtoNome} excluído com sucesso.`, 'success');
+            renderApp();
+        }
+    }
+
+
+    // FUNÇÕES DE USUÁRIO
+    
+    function abrirModalUsuario(usuario = null) {
+        // ... (Lógica inalterada)
+        if (usuario) {
+            const user = appState.usuarios[usuario];
+            const lojasPermitidasStr = user.lojasPermitidas ? user.lojasPermitidas.join(', ') : '';
+            appState.modalUsuario = { aberto: true, dados: { ...user, usuarioKey: usuario, lojasPermitidasStr } };
+        } else {
+            appState.modalUsuario = { 
+                aberto: true, 
+                dados: { usuario: '', senha: '', nome: '', nivel: 'vendedor', lojasPermitidasStr: '', usuarioKey: null } 
+            };
+        }
+        renderApp();
+    }
+
+    function fecharModalUsuario() {
+        appState.modalUsuario = { aberto: false, dados: null };
+        renderApp();
+    }
+
+    function salvarUsuario(event) {
+        event.preventDefault();
+        
+        const usuario = document.getElementById('userUsuario').value.trim();
+        const senha = document.getElementById('userSenha').value;
+        const nome = document.getElementById('userNome').value.trim();
+        const nivel = document.getElementById('userNivel').value;
+        const lojasInput = document.getElementById('userLojasPermitidas').value.trim();
+
+        if (!usuario || !senha || !nome) {
+            showToast('Preencha todos os campos obrigatórios.', 'error');
+            return;
+        }
+        
+        const lojasPermitidas = lojasInput
+            .split(',')
+            .map(id => parseInt(id.trim(), 10))
+            .filter(id => !isNaN(id) && id > 0 && appState.lojas.some(l => l.id === id));
+
+        if (nivel === 'vendedor' && lojasPermitidas.length === 0) {
+            showToast('Vendedores devem ter pelo menos uma loja válida cadastrada.', 'error');
+            return;
+        }
+
+        const usuarioKey = appState.modalUsuario.dados.usuarioKey;
+        const isNew = !usuarioKey;
+        
+        if (isNew) {
+            if (appState.usuarios[usuario]) {
+                showToast('Este nome de usuário já existe.', 'error');
+                return;
+            }
+            appState.usuarios[usuario] = { usuario, senha, nome, nivel, lojasPermitidas };
+        } else {
+            if (usuario !== usuarioKey && appState.usuarios[usuario]) {
+                showToast('Este nome de usuário já existe.', 'error');
+                return;
+            }
+            if (usuario !== usuarioKey) {
+                delete appState.usuarios[usuarioKey];
+            }
+            appState.usuarios[usuario] = { usuario, senha, nome, nivel, lojasPermitidas };
+        }
+
+        fecharModalUsuario();
+        showToast(`Usuário ${nome} ${isNew ? 'criado' : 'atualizado'} com sucesso!`, 'success');
+        renderApp();
+    }
+
+    function excluirUsuario(usuario) {
+        if (appState.usuarioLogado.usuario === usuario) {
+            showToast('Você não pode excluir seu próprio usuário!', 'error');
+            return;
+        }
+        if (confirm('Tem certeza que deseja excluir este usuário?')) {
+            const nomeUsuario = appState.usuarios[usuario]?.nome || 'Usuário';
+            delete appState.usuarios[usuario];
+            showToast(`${nomeUsuario} excluído com sucesso.`, 'success');
+            renderApp();
+        }
+    }
+
+    // FUNÇÕES DE LOJA
+
+    function abrirModalLoja(id = null) {
+        // ... (Lógica inalterada)
+        if (id) {
+            const loja = appState.lojas.find(l => l.id === id);
+            appState.modalLoja = { aberto: true, dados: { ...loja } };
+        } else {
+            appState.modalLoja = { 
+                aberto: true, 
+                dados: { id: null, nome: '', endereco: '' } 
+            };
+        }
+        renderApp();
+    }
+
+    function fecharModalLoja() {
+        appState.modalLoja = { aberto: false, dados: null };
+        renderApp();
+    }
+
+    function salvarLoja(event) {
+        event.preventDefault();
+        
+        const nome = document.getElementById('lojaNome').value.trim();
+        const endereco = document.getElementById('lojaEndereco').value.trim();
+        
+        if (!nome || !endereco) {
+            showToast('Preencha todos os campos obrigatórios.', 'error');
+            return;
+        }
+
+        const isNew = appState.modalLoja.dados.id === null;
+
+        if (!isNew) {
+            appState.lojas = appState.lojas.map(l =>
+                l.id === appState.modalLoja.dados.id
+                ? { ...l, nome, endereco }
+                : l
+            );
+        } else {
+            const novoId = appState.lojas.length > 0 ? Math.max(...appState.lojas.map(l => l.id)) + 1 : 1;
+            const novaLoja = { id: novoId, nome, endereco };
+            appState.lojas.push(novaLoja);
+        }
+
+        fecharModalLoja();
+        showToast(`Loja ${nome} ${isNew ? 'adicionada' : 'atualizada'} com sucesso!`, 'success');
+        renderApp();
+    }
+
+    function excluirLoja(id) {
+        const loja = appState.lojas.find(l => l.id === id);
+        if (!loja) return;
+
+        const usuariosComLoja = Object.values(appState.usuarios).filter(u =>
+            u.lojasPermitidas && u.lojasPermitidas.includes(id)
+        );
+        
+        const estoqueAtivo = appState.estoqueLojas.some(item => item.lojaId === id && item.quantidade > 0);
+
+        if (usuariosComLoja.length > 0) {
+            const nomes = usuariosComLoja.map(u => u.nome).join(', ');
+            showToast(`Não é possível excluir esta loja. Usuários vinculados: ${nomes}`, 'error');
+            return;
+        }
+
+        if (estoqueAtivo) {
+             showToast(`Não é possível excluir esta loja. Ainda há estoque ativo (ou registros de estoque) nela. Zere o estoque primeiro.`, 'error');
+            return;
+        }
+
+        if (confirm(`Tem certeza que deseja excluir a loja "${loja.nome}"?`)) {
+            appState.lojas = appState.lojas.filter(l => l.id !== id);
+            appState.estoqueLojas = appState.estoqueLojas.filter(item => item.lojaId !== id);
+            showToast(`Loja ${loja.nome} excluída com sucesso.`, 'success');
+            renderApp();
+        }
+    }
+
+    // =========================================================
+    // 7. FUNÇÕES DE RENDERIZAÇÃO
+    // =========================================================
+
+    // RENDERIZAÇÃO DO TOAST
+    const renderToast = () => {
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            // Z-50 garante que o toast esteja acima de tudo, inclusive modais
+            toastContainer.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none'; 
+            document.body.appendChild(toastContainer);
+        }
+
+        if (!appState.toast.visivel) {
+            // Se o estado for falso, remove o conteúdo com animação (se possível)
+            toastContainer.innerHTML = '';
+            return;
+        }
+
+        const { mensagem, tipo } = appState.toast;
+        let bgColor, icon;
+
+        switch (tipo) {
+            case 'success':
+                bgColor = 'bg-green-500';
+                icon = 'CheckCircle';
+                break;
+            case 'error':
+                bgColor = 'bg-red-500';
+                icon = 'AlertTriangle';
+                break;
+            case 'info':
+            default:
+                bgColor = 'bg-blue-500';
+                icon = 'Info';
+                break;
+        }
+        
+        // Renderiza o Toast (com a classe de entrada para animar)
+        toastContainer.innerHTML = `
+            <div id="custom-toast" class="toast-enter-active ${bgColor} text-white p-4 rounded-lg shadow-2xl flex items-center space-x-3 pointer-events-auto min-w-[300px]">
+                ${getIcon(icon, 'w-6 h-6')}
+                <p class="font-semibold">${mensagem}</p>
+                <button onclick="clearTimeout(appState.toast.timeoutId); appState.toast.visivel = false; renderToast();" class="text-white opacity-75 hover:opacity-100 transition ml-auto">
+                    ${getIcon('X', 'w-4 h-4')}
+                </button>
+            </div>
+        `;
+    };
+
+
+    const renderLogin = () => {
+        // ... (Lógica de Login inalterada)
+        return `
+            <div class="min-h-screen w-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
+                <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-500 hover:scale-[1.02]">
+                    <div class="text-center mb-6">
+                        ${getIcon('Coffee', 'w-16 h-16 text-blue-600 mx-auto mb-4')}
+                        <h1 class="text-3xl font-extrabold text-gray-800">Sistema de Gestão</h1>
+                        <p class="text-gray-600">Controle de Estoque e Vendas</p>
+                    </div>
+                    
+                    <div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-medium mb-2" for="usuarioInput">Usuário</label>
+                            <input type="text" id="usuarioInput" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-100 transition-colors" placeholder="Digite seu Usuário" />
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-gray-700 font-medium mb-2" for="senhaInput">Senha</label>
+                            <input type="password" id="senhaInput" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-100 transition-colors" placeholder="Digite sua Senha" />
+                        </div>
+                        
+                        <button onclick="fazerLogin(document.getElementById('usuarioInput').value, document.getElementById('senhaInput').value)" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition transform hover:scale-[1.01] shadow-lg">Entrar</button>
+                    </div>
+
+                </div>
+            </div>
+        `;
+    };
+    
+    const renderSelecaoLoja = () => {
+        // ... (Lógica de Seleção de Loja inalterada)
+        const lojasPermitidas = appState.lojas.filter(l => appState.usuarioLogado.lojasPermitidas.includes(l.id));
+
+        return `
+            ${renderBaseLayout('Seleção de Loja', `
+                <div class="p-4 md:p-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Selecione sua Loja</h2>
+                    <p class="text-gray-600 mb-8">Você possui acesso a múltiplas lojas. Escolha uma para começar a registrar vendas.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${lojasPermitidas.map(loja => `
+                            <div onclick="selecionarLoja(${loja.id})" class="bg-white p-6 rounded-xl shadow-lg border border-blue-200 hover:shadow-xl hover:border-blue-400 cursor-pointer transition duration-200 flex items-center space-x-4">
+                                ${getIcon('Store', 'w-8 h-8 text-blue-500')}
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-800">${loja.nome}</h3>
+                                    <p class="text-sm text-gray-500">${loja.endereco}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `)}
+        `;
+    };
+
+    // FUNÇÃO MELHORADA DE LAYOUT BASE (AGORA COM RESPONSIVIDADE NA SIDEBAR)
+    const renderBaseLayout = (title, content, isVendas = false) => {
+        const { usuarioLogado, telaAtiva, sidebarOpen } = appState;
+        const isAdmin = usuarioLogado.nivel === 'senior';
+        const lojaInfo = usuarioLogado.lojaSelecionada ? ` | ${usuarioLogado.lojaSelecionada.nome}` : '';
+
+        // Estrutura de navegação para Admin e Vendedor
+        const navItems = [
+            { id: 'dashboard', label: 'Dashboard', icon: 'TrendingUp', roles: ['senior'] },
+            { id: 'vendas', label: 'Vendas', icon: 'ShoppingCart', roles: ['vendedor'] },
+            { id: 'relatorio', label: 'Relatório', icon: 'FileText', roles: ['vendedor', 'senior'] },
+            { id: 'estoque', label: 'Produtos/Estoque', icon: 'Package', roles: ['senior'] },
+            { id: 'usuarios', label: 'Usuários', icon: 'Users', roles: ['senior'] },
+            { id: 'lojas', label: 'Lojas', icon: 'MapPin', roles: ['senior'] },
+        ].filter(item => item.roles.includes(usuarioLogado.nivel));
+
+        // Determina classes para a Sidebar e o Overlay
+        const sidebarClass = `fixed md:relative top-0 left-0 h-screen w-64 bg-gray-900 text-white flex-shrink-0 z-40 transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0 shadow-xl' : '-translate-x-full md:translate-x-0'}`;
+        const overlayClass = `fixed inset-0 bg-black opacity-50 z-30 md:hidden ${sidebarOpen ? 'block' : 'hidden'}`;
+
+        return `
+            <div class="flex min-h-screen w-full relative">
+                
+                <div class="${overlayClass}" onclick="toggleSidebar()"></div>
+
+                <div class="${sidebarClass}">
+                    <div class="p-6">
+                        <div class="flex items-center space-x-3 mb-8">
+                            ${getIcon('Coffee', 'w-8 h-8 text-blue-400')}
+                            <span class="text-xl font-bold">Gestão Multi-Loja</span>
+                        </div>
+                        <nav>
+                            ${navItems.map(item => `
+                                <a href="#" onclick="mudarTela('${item.id}')" class="flex items-center space-x-3 p-3 rounded-lg transition duration-150 ${telaAtiva === item.id ? 'bg-blue-600 font-semibold' : 'text-gray-400 hover:bg-gray-800'} mb-2">
+                                    ${getIcon(item.icon, 'w-5 h-5')}
+                                    <span>${item.label}</span>
+                                </a>
+                            `).join('')}
+                        </nav>
+                    </div>
+                    
+                    <div class="mt-auto p-6 border-t border-gray-800 absolute bottom-0 w-full">
+                        ${isAdmin || (usuarioLogado.nivel === 'vendedor' && appState.lojas.filter(l => usuarioLogado.lojasPermitidas.includes(l.id)).length > 1) ? `
+                            <button onclick="mudarTela('selecaoLoja')" class="w-full flex items-center justify-start space-x-2 text-sm text-blue-300 hover:text-blue-200 p-2 rounded-lg hover:bg-gray-800 transition mb-2">
+                                ${getIcon('Store', 'w-4 h-4')}
+                                <span>Alterar Loja</span>
+                            </button>
+                        ` : ''}
+                        <button onclick="fazerLogout()" class="w-full flex items-center justify-start space-x-2 text-sm text-red-400 hover:text-red-300 p-2 rounded-lg hover:bg-gray-800 transition">
+                            ${getIcon('LogOut', 'w-5 h-5')}
+                            <span>Sair (${usuarioLogado.nome.split(' ')[0]})</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-1 flex flex-col overflow-y-auto">
+                    
+                    <header class="bg-white shadow-md p-4 flex items-center justify-between sticky top-0 z-20 md:hidden">
+                        <button onclick="toggleSidebar()" class="text-gray-700">
+                            ${getIcon('Menu', 'w-6 h-6')}
+                        </button>
+                        <h1 class="text-xl font-semibold text-gray-800">${title}</h1>
+                        <div class="w-6 h-6"></div> </header>
+                    
+                    <header class="bg-white shadow-sm p-4 sticky top-0 z-20 hidden md:block">
+                        <div class="flex items-center justify-between">
+                            <h1 class="text-2xl font-bold text-gray-800">${title} <span class="text-blue-500">${lojaInfo}</span></h1>
+                            <div class="text-gray-600 flex items-center space-x-2">
+                                ${getIcon(isVendas ? 'DollarSign' : 'Users', 'w-5 h-5')}
+                                <span>${usuarioLogado.nome} (${usuarioLogado.nivel})</span>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main class="flex-1 pb-10">
+                        ${content}
+                    </main>
+                </div>
+            </div>
+            ${renderModals()}
+        `;
+    };
+
+    const renderDashboard = () => {
+        // ... (Cálculos de Relatório para Dashboard)
+        const relatorio = calcularRelatorio('mensal');
+        const numLojas = appState.lojas.length;
+        const numProdutos = appState.produtos.length;
+        const numUsuarios = Object.keys(appState.usuarios).length;
+        const totalEstoque = appState.estoqueLojas.reduce((sum, item) => sum + item.quantidade, 0);
+
+        // Grid responsivo para cards
+        const cardGridClass = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8";
+
+        const cards = [
+            { icon: 'DollarSign', title: 'Vendas Mês', value: formatCurrency(relatorio.totalGeral), color: 'bg-green-500', iconColor: 'text-green-100' },
+            { icon: 'FileText', title: 'Total Vendas', value: relatorio.quantidade, color: 'bg-blue-500', iconColor: 'text-blue-100' },
+            { icon: 'Package', title: 'Total Itens Estoque', value: totalEstoque, color: 'bg-yellow-500', iconColor: 'text-yellow-100' },
+            { icon: 'Store', title: 'Lojas Ativas', value: numLojas, color: 'bg-purple-500', iconColor: 'text-purple-100' },
+        ];
+        
+        // ... (Tabela de Vendas Recentes)
+        const vendasRecentes = appState.vendas.slice(-5).reverse(); // Últimas 5 vendas
+
+        return renderBaseLayout('Dashboard', `
+            <div class="p-4 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 hidden md:block">Visão Geral do Mês</h2>
+                
+                <div class="${cardGridClass}">
+                    ${cards.map(card => `
+                        <div class="bg-white p-6 rounded-xl shadow-lg flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">${card.title}</p>
+                                <p class="text-2xl font-bold text-gray-800 mt-1">${card.value}</p>
+                            </div>
+                            <div class="p-3 rounded-full ${card.color} ${card.iconColor}">
+                                ${getIcon(card.icon, 'w-6 h-6')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2">
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Últimas Vendas</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loja</th>
+                                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pagto</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        ${vendasRecentes.length > 0 ? vendasRecentes.map(venda => `
+                                            <tr>
+                                                <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${venda.id}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${venda.loja}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${new Date(venda.data).toLocaleDateString()}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-green-600">${formatCurrency(venda.total)}</td>
+                                                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${venda.formaPagamento}</td>
+                                            </tr>
+                                        `).join('') : `
+                                            <tr><td colspan="5" class="px-3 py-4 text-center text-sm text-gray-500">Nenhuma venda registrada este mês.</td></tr>
+                                        `}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-1">
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Resumo do Sistema</h3>
+                            <ul class="space-y-3">
+                                <li class="flex justify-between items-center text-gray-700">
+                                    <span class="flex items-center space-x-2">${getIcon('Package', 'w-5 h-5 text-yellow-500')} <span>Produtos Cadastrados:</span></span>
+                                    <span class="font-bold">${numProdutos}</span>
+                                </li>
+                                <li class="flex justify-between items-center text-gray-700">
+                                    <span class="flex items-center space-x-2">${getIcon('Users', 'w-5 h-5 text-blue-500')} <span>Usuários Ativos:</span></span>
+                                    <span class="font-bold">${numUsuarios}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        `);
+    };
+
+    const renderVendas = () => {
+        // Classes para a Vendas (Grid de duas colunas, empilhando em mobile)
+        const gridClass = "grid grid-cols-1 lg:grid-cols-3 gap-6 p-4 md:p-8";
+        const produtosClass = "lg:col-span-2";
+        const carrinhoClass = "lg:col-span-1";
+
+        const produtosComEstoque = appState.produtos.map(p => ({
+            ...p,
+            estoque: getEstoqueLoja(p.id, appState.usuarioLogado.lojaSelecionada?.id || -1)
+        }));
+
+        const carrinhoTotal = appState.carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+
+        return renderBaseLayout('Vendas em ' + (appState.usuarioLogado.lojaSelecionada?.nome || 'Loja Não Selecionada'), `
+            <div class="${gridClass}">
+                <div class="${produtosClass}">
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Catálogo de Produtos</h2>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                            ${produtosComEstoque.map(p => `
+                                <button onclick="adicionarAoCarrinho(${p.id})" ${p.estoque === 0 ? 'disabled' : ''} class="w-full text-left p-4 border rounded-lg transition-all duration-200 ${p.estoque > 0 ? 'bg-white hover:bg-gray-50 border-gray-300' : 'bg-red-100 border-red-300 cursor-not-allowed opacity-70'}">
+                                    <div class="text-lg font-semibold text-gray-900 truncate">${p.nome}</div>
+                                    <div class="flex justify-between items-center mt-1">
+                                        <span class="text-blue-600 font-bold">${formatCurrency(p.preco)}</span>
+                                        <span class="text-sm ${p.estoque > 5 ? 'text-green-600' : p.estoque > 0 ? 'text-yellow-600' : 'text-red-600'} font-medium">
+                                            ${p.estoque > 0 ? `Estoque: ${p.estoque}` : 'Esgotado'}
+                                        </span>
+                                    </div>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="${carrinhoClass} sticky top-4">
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-between">
+                            <span>Carrinho</span>
+                            ${getIcon('ShoppingCart', 'w-6 h-6 text-blue-500')}
+                        </h2>
+
+                        ${appState.carrinho.length === 0 ? `
+                            <p class="text-gray-500 italic text-center py-4">O carrinho está vazio.</p>
+                        ` : `
+                            <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                                ${appState.carrinho.map(item => `
+                                    <div class="flex items-center justify-between border-b pb-2">
+                                        <div>
+                                            <p class="font-medium text-gray-900">${item.nome}</p>
+                                            <p class="text-sm text-gray-500">${item.quantidade} x ${formatCurrency(item.preco)}</p>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-green-600">${formatCurrency(item.preco * item.quantidade)}</span>
+                                            <button onclick="removerDoCarrinho(${item.id})" class="text-red-500 hover:text-red-700 p-1">
+                                                ${getIcon('Trash2', 'w-4 h-4')}
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
+
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-xl font-semibold text-gray-800">Total:</span>
+                                <span class="text-2xl font-bold text-green-700">${formatCurrency(carrinhoTotal)}</span>
+                            </div>
+
+                            <p class="text-sm font-medium text-gray-700 mb-2">Forma de Pagamento:</p>
+                            
+                            <div class="space-y-3">
+                                <button onclick="finalizarVenda('dinheiro')" ${appState.carrinho.length === 0 ? 'disabled' : ''} class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition ${appState.carrinho.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}">
+                                    Finalizar (Dinheiro)
+                                </button>
+                                <button onclick="finalizarVenda('cartao')" ${appState.carrinho.length === 0 ? 'disabled' : ''} class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition ${appState.carrinho.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}">
+                                    Finalizar (Cartão)
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        `, true);
+    };
+
+    const renderRelatorio = () => {
+        const { vendasFiltradas, totalGeral, totalCartao, totalDinheiro, quantidade } = calcularRelatorio(appState.relatorioPeriodo);
+        const isAdmin = appState.usuarioLogado.nivel === 'senior';
+
+        // Grid responsivo para cards
+        const cardGridClass = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8";
+
+        const cards = [
+            { icon: 'FileText', title: 'Nº de Vendas', value: quantidade, color: 'bg-blue-500', iconColor: 'text-blue-100' },
+            { icon: 'DollarSign', title: 'Total Geral', value: formatCurrency(totalGeral), color: 'bg-green-500', iconColor: 'text-green-100' },
+            { icon: 'Wallet', title: 'Total Dinheiro', value: formatCurrency(totalDinheiro), color: 'bg-yellow-500', iconColor: 'text-yellow-100' },
+            { icon: 'CreditCard', title: 'Total Cartão', value: formatCurrency(totalCartao), color: 'bg-indigo-500', iconColor: 'text-indigo-100' },
+        ];
+        
+        return renderBaseLayout('Relatório de Vendas', `
+            <div class="p-4 md:p-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 hidden md:block">Relatório Detalhado</h2>
+
+                <div class="bg-white p-4 rounded-xl shadow-lg mb-6">
+                    <h3 class="text-lg font-semibold mb-3">Filtro por Período</h3>
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <button onclick="setRelatorioPeriodo('diario')" class="px-4 py-2 text-sm rounded-lg transition ${appState.relatorioPeriodo === 'diario' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">Diário</button>
+                        <button onclick="setRelatorioPeriodo('mensal')" class="px-4 py-2 text-sm rounded-lg transition ${appState.relatorioPeriodo === 'mensal' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">Mensal</button>
+                        <button onclick="setRelatorioPeriodo('anual')" class="px-4 py-2 text-sm rounded-lg transition ${appState.relatorioPeriodo === 'anual' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">Anual</button>
+                        <button onclick="setRelatorioPeriodo('personalizado')" class="px-4 py-2 text-sm rounded-lg transition ${appState.relatorioPeriodo === 'personalizado' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">Personalizado</button>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 ${appState.relatorioPeriodo === 'personalizado' ? 'block' : 'hidden'}">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="dataInicio">Data Início</label>
+                            <input type="date" id="dataInicio" value="${appState.dataInicioFiltro}" onchange="setDataFiltro('inicio', this.value)" class="w-full px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="dataFim">Data Fim</label>
+                            <input type="date" id="dataFim" value="${appState.dataFimFiltro}" onchange="setDataFiltro('fim', this.value)" class="w-full px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="${cardGridClass}">
+                    ${cards.map(card => `
+                        <div class="bg-white p-6 rounded-xl shadow-lg flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">${card.title}</p>
+                                <p class="text-2xl font-bold text-gray-800 mt-1">${card.value}</p>
+                            </div>
+                            <div class="p-3 rounded-full ${card.color} ${card.iconColor}">
+                                ${getIcon(card.icon, 'w-6 h-6')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Vendas Detalhadas (${appState.relatorioPeriodo.toUpperCase()})</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    ${isAdmin ? `<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loja</th>` : ''}
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pagto</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendedor</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${vendasFiltradas.length > 0 ? vendasFiltradas.map(venda => `
+                                    <tr>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${venda.id}</td>
+                                        ${isAdmin ? `<td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${venda.loja}</td>` : ''}
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(venda.data).toLocaleString()}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm font-semibold text-green-600">${formatCurrency(venda.total)}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${venda.formaPagamento}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${venda.vendedor}</td>
+                                    </tr>
+                                `).join('') : `
+                                    <tr><td colspan="${isAdmin ? 6 : 5}" class="px-4 py-4 text-center text-sm text-gray-500">Nenhuma venda encontrada no período selecionado.</td></tr>
+                                `}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        `);
+    };
+
+    const renderEstoque = () => {
+        const produtosComEstoque = appState.produtos.map(p => {
+            const totalEstoque = appState.lojas.reduce((sum, loja) => sum + getEstoqueLoja(p.id, loja.id), 0);
+            return {
+                ...p,
+                totalEstoque
+            };
+        }).sort((a, b) => a.id - b.id);
+        
+        return renderBaseLayout('Gerenciamento de Produtos e Estoque', `
+            <div class="p-4 md:p-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-3 sm:mb-0">Produtos e Estoque</h2>
+                    <button onclick="abrirModalProduto()" class="w-full sm:w-auto flex items-center justify-center space-x-2 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition">
+                        ${getIcon('Plus', 'w-5 h-5')}
+                        <span>Novo Produto</span>
+                    </button>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preço</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Armazém</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${produtosComEstoque.map(p => `
+                                    <tr>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.id}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${p.nome}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${p.categoria}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-blue-600">${formatCurrency(p.preco)}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm ${p.totalEstoque > 0 ? 'text-green-600' : 'text-red-600'} font-bold">${p.totalEstoque}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                                            <div class="flex space-x-2">
+                                                <button onclick="abrirModalProduto(${p.id})" class="text-indigo-600 hover:text-indigo-900 p-1 rounded-full hover:bg-indigo-100 transition">
+                                                    ${getIcon('Edit', 'w-5 h-5')}
+                                                </button>
+                                                <button onclick="excluirProduto(${p.id})" class="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-100 transition">
+                                                    ${getIcon('Trash2', 'w-5 h-5')}
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        `);
+    };
+
+    const renderUsuarios = () => {
+        const usuariosList = Object.keys(appState.usuarios).map(key => appState.usuarios[key]).sort((a, b) => a.usuario.localeCompare(b.usuario));
+        
+        return renderBaseLayout('Gerenciamento de Usuários', `
+            <div class="p-4 md:p-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-3 sm:mb-0">Usuários do Sistema</h2>
+                    <button onclick="abrirModalUsuario()" class="w-full sm:w-auto flex items-center justify-center space-x-2 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition">
+                        ${getIcon('Plus', 'w-5 h-5')}
+                        <span>Novo Usuário</span>
+                    </button>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome de Usuário</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome Completo</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nível</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lojas Permitidas</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${usuariosList.map(u => `
+                                    <tr>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${u.usuario}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${u.nome}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium ${u.nivel === 'senior' ? 'text-purple-600' : 'text-blue-600'}">${u.nivel.toUpperCase()}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${u.lojasPermitidas ? u.lojasPermitidas.join(', ') : 'Todas'}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                                            <div class="flex space-x-2">
+                                                <button onclick="abrirModalUsuario('${u.usuario}')" class="text-indigo-600 hover:text-indigo-900 p-1 rounded-full hover:bg-indigo-100 transition">
+                                                    ${getIcon('Edit', 'w-5 h-5')}
+                                                </button>
+                                                ${u.usuario !== appState.usuarioLogado.usuario ? `
+                                                    <button onclick="excluirUsuario('${u.usuario}')" class="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-100 transition">
+                                                        ${getIcon('Trash2', 'w-5 h-5')}
+                                                    </button>
+                                                ` : ''}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        `);
+    };
+
+    const renderLojas = () => {
+        const lojasList = appState.lojas.slice().sort((a, b) => a.id - b.id);
+
+        return renderBaseLayout('Gerenciamento de Lojas', `
+            <div class="p-4 md:p-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-3 sm:mb-0">Lojas Cadastradas</h2>
+                    <button onclick="abrirModalLoja()" class="w-full sm:w-auto flex items-center justify-center space-x-2 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition">
+                        ${getIcon('Plus', 'w-5 h-5')}
+                        <span>Nova Loja</span>
+                    </button>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Endereço</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${lojasList.map(l => `
+                                    <tr>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${l.id}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${l.nome}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${l.endereco}</td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                                            <div class="flex space-x-2">
+                                                <button onclick="abrirModalLoja(${l.id})" class="text-indigo-600 hover:text-indigo-900 p-1 rounded-full hover:bg-indigo-100 transition">
+                                                    ${getIcon('Edit', 'w-5 h-5')}
+                                                </button>
+                                                <button onclick="excluirLoja(${l.id})" class="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-100 transition">
+                                                    ${getIcon('Trash2', 'w-5 h-5')}
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `);
+    };
+    
+    // RENDERIZAÇÃO DE MODAIS (MELHORADA PARA RESPONSIVIDADE)
+    const renderModalProduto = () => {
+        if (!appState.modalProduto.aberto || !appState.modalProduto.dados) return '';
+        const dados = appState.modalProduto.dados;
+        const isNew = dados.novoProduto;
+
+        // Adiciona classes para tornar o modal scrollável em telas pequenas
+        return `
+            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onclick="if(event.target === this) fecharModalProduto()">
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl max-h-screen overflow-y-auto transform transition-all duration-300">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4 border-b pb-3">
+                            <h3 class="text-2xl font-bold text-gray-800">${isNew ? 'Adicionar Novo Produto' : `Editar Produto: ${dados.nome}`}</h3>
+                            <button onclick="fecharModalProduto()" class="text-gray-400 hover:text-gray-600 transition">
+                                ${getIcon('X', 'w-6 h-6')}
+                            </button>
+                        </div>
+
+                        <form onsubmit="salvarProduto(event)">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="prodNome">Nome</label>
+                                    <input type="text" id="prodNome" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500" value="${dados.nome}" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="prodPreco">Preço (Eur)</label>
+                                    <input type="number" step="0.01" id="prodPreco" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500" value="${dados.preco}" required>
+                                </div>
+                                <div class="col-span-1 md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700" for="prodCategoria">Categoria</label>
+                                    <select id="prodCategoria" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="bebidas" ${dados.categoria === 'bebidas' ? 'selected' : ''}>Bebidas</option>
+                                        <option value="cardapio" ${dados.categoria === 'cardapio' ? 'selected' : ''}>Cardápio</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <h4 class="text-lg font-semibold text-gray-800 mt-6 mb-3 border-t pt-3">Estoque por Loja</h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                ${appState.lojas.map(loja => `
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700" for="estoque-${loja.id}">${loja.nome}</label>
+                                        <input type="number" min="0" id="estoque-${loja.id}" oninput="atualizarEstoqueModal(${loja.id}, this.value)" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500" value="${dados.estoqueDetalhe[loja.id] || 0}" required>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <div class="mt-6 flex justify-end space-x-3">
+                                <button type="button" onclick="fecharModalProduto()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">
+                                    ${isNew ? 'Adicionar' : 'Salvar Alterações'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    const renderModalUsuario = () => {
+        if (!appState.modalUsuario.aberto || !appState.modalUsuario.dados) return '';
+        const dados = appState.modalUsuario.dados;
+        const isNew = !dados.usuarioKey;
+
+        return `
+            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onclick="if(event.target === this) fecharModalUsuario()">
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-screen overflow-y-auto transform transition-all duration-300">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4 border-b pb-3">
+                            <h3 class="text-2xl font-bold text-gray-800">${isNew ? 'Criar Novo Usuário' : `Editar Usuário: ${dados.nome}`}</h3>
+                            <button onclick="fecharModalUsuario()" class="text-gray-400 hover:text-gray-600 transition">
+                                ${getIcon('X', 'w-6 h-6')}
+                            </button>
+                        </div>
+
+                        <form onsubmit="salvarUsuario(event)">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="userNome">Nome Completo</label>
+                                    <input type="text" id="userNome" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500" value="${dados.nome}" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="userUsuario">Nome de Usuário</label>
+                                    <input type="text" id="userUsuario" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500" value="${dados.usuario}" required ${!isNew ? 'readonly' : ''}>
+                                    ${!isNew ? '<p class="text-xs text-gray-500 mt-1">O nome de usuário não pode ser alterado após a criação.</p>' : ''}
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="userSenha">Senha</label>
+                                    <input type="password" id="userSenha" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500" value="${dados.senha}" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="userNivel">Nível de Acesso</label>
+                                    <select id="userNivel" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="vendedor" ${dados.nivel === 'vendedor' ? 'selected' : ''}>Vendedor</option>
+                                        <option value="senior" ${dados.nivel === 'senior' ? 'selected' : ''}>Gerente/Senior</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="userLojasPermitidas">Lojas Permitidas (IDs separados por vírgula, ex: 1, 3)</label>
+                                    <input type="text" id="userLojasPermitidas" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500" value="${dados.lojasPermitidasStr}">
+                                    <p class="text-xs text-gray-500 mt-1">O ID 1 é ${appState.lojas.find(l => l.id === 1)?.nome || 'Loja 1'}. Deixe vazio se for Gerente/Senior (acesso a todas).</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6 flex justify-end space-x-3">
+                                <button type="button" onclick="fecharModalUsuario()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">
+                                    ${isNew ? 'Criar Usuário' : 'Salvar Alterações'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    const renderModalLoja = () => {
+        if (!appState.modalLoja.aberto || !appState.modalLoja.dados) return '';
+        const dados = appState.modalLoja.dados;
+        const isNew = !dados.id;
+
+        return `
+            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onclick="if(event.target === this) fecharModalLoja()">
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-screen overflow-y-auto transform transition-all duration-300">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4 border-b pb-3">
+                            <h3 class="text-2xl font-bold text-gray-800">${isNew ? 'Adicionar Nova Loja' : `Editar Loja: ${dados.nome}`}</h3>
+                            <button onclick="fecharModalLoja()" class="text-gray-400 hover:text-gray-600 transition">
+                                ${getIcon('X', 'w-6 h-6')}
+                            </button>
+                        </div>
+
+                        <form onsubmit="salvarLoja(event)">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="lojaNome">Nome da Loja</label>
+                                    <input type="text" id="lojaNome" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500" value="${dados.nome}" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="lojaEndereco">Endereço</label>
+                                    <input type="text" id="lojaEndereco" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500" value="${dados.endereco}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6 flex justify-end space-x-3">
+                                <button type="button" onclick="fecharModalLoja()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
+                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">
+                                    ${isNew ? 'Adicionar Loja' : 'Salvar Alterações'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+
+    const renderModals = () => {
+        return renderModalProduto() + renderModalUsuario() + renderModalLoja();
+    };
+
+
+    // FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO
+    const renderApp = () => {
+        let htmlContent = '';
+        
+        // Determina o conteúdo principal
+        switch (appState.telaAtiva) {
+            case 'login':
+                htmlContent = renderLogin();
+                break;
+            case 'selecaoLoja':
+                htmlContent = renderSelecaoLoja();
+                break;
+            case 'dashboard':
+                htmlContent = renderDashboard();
+                break;
+            case 'vendas':
+                htmlContent = renderVendas();
+                break;
+            case 'relatorio':
+                htmlContent = renderRelatorio();
+                break;
+            case 'estoque':
+                htmlContent = renderEstoque();
+                break;
+            case 'usuarios':
+                htmlContent = renderUsuarios();
+                break;
+            case 'lojas':
+                htmlContent = renderLojas();
+                break;
+            default:
+                htmlContent = renderLogin();
+        }
+        
+        appContainer.innerHTML = htmlContent;
+        // Chama a renderização do toast para garantir que ele esteja sempre no DOM
+        renderToast(); 
+    };
+
+    // Inicializa a aplicação
+    renderApp();
+</script>
+</body>
+</html>
