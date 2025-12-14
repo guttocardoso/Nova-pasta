@@ -61,12 +61,46 @@
         usuarioLogado: null,
         telaAtiva: 'login',
         produtos: [
-            { id: 1, nome: 'Coca-Cola 350ml', categoria: 'bebidas', preco: 5.00 },
-            { id: 2, nome: 'Guaraná 2L', categoria: 'bebidas', preco: 8.50 },
-            { id: 3, nome: 'Água Mineral', categoria: 'bebidas', preco: 3.00 },
-            { id: 4, nome: 'Hambúrguer', categoria: 'cardapio', preco: 25.00 },
-            { id: 5, nome: 'Pizza Grande', categoria: 'cardapio', preco: 45.00 },
-            { id: 6, nome: 'Batata Frita', categoria: 'cardapio', preco: 12.00 }
+            // Produtos baseados no menu fornecido (Preço como Categoria)
+            { id: 1, nome: 'SHOT - BLACK RUSSIAN', categoria: 'SHOT', subcategoria: '3.00', preco: 3.00 },
+            { id: 2, nome: 'SHOT - TEQUILA', categoria: 'SHOT', subcategoria: '3.00', preco: 3.00 },
+            { id: 3, nome: 'SHOT - K.O.', categoria: 'SHOT', subcategoria: '3.00', preco: 3.00 },
+            { id: 4, nome: 'SHOT - LICOR 43', categoria: 'SHOT', subcategoria: '3.00', preco: 3.00 },
+            { id: 5, nome: 'SHOT - JAGERMEISTER', categoria: 'SHOT', subcategoria: '3.00', preco: 3.00 },
+            { id: 6, nome: 'SHOT - LEMON DROP', categoria: 'SHOT', subcategoria: '3.00', preco: 3.00 },
+            { id: 7, nome: 'SHOT - KENTUCKY LEMONADE', categoria: 'SHOT', subcategoria: '3.00', preco: 3.00 },
+            { id: 8, nome: 'SHOT - LICOR BEIRÃO', categoria: 'SHOT', subcategoria: '3.00', preco: 3.00 },
+            
+            { id: 9, nome: 'COCKTAIL - GIN TONIC', categoria: 'COCKTAIL', subcategoria: '5.00', preco: 5.00 },
+            { id: 10, nome: 'COCKTAIL - PORTONICA', categoria: 'COCKTAIL', subcategoria: '5.00', preco: 5.00 },
+            { id: 11, nome: 'COCKTAIL - CUBA LIBRE', categoria: 'COCKTAIL', subcategoria: '5.00', preco: 5.00 },
+            { id: 12, nome: 'COCKTAIL - SANGRIA', categoria: 'COCKTAIL', subcategoria: '5.00', preco: 5.00 },
+            { id: 13, nome: 'COCKTAIL - TINTO VERANO', categoria: 'COCKTAIL', subcategoria: '5.00', preco: 5.00 },
+            { id: 14, nome: 'COCKTAIL - WHISKEY COLA', categoria: 'COCKTAIL', subcategoria: '5.00', preco: 5.00 },
+            
+            { id: 15, nome: 'COCKTAIL - MOJITO', categoria: 'COCKTAIL', subcategoria: '6.00', preco: 6.00 },
+            { id: 16, nome: 'COCKTAIL - CAIPIRINHA', categoria: 'COCKTAIL', subcategoria: '6.00', preco: 6.00 },
+            { id: 17, nome: 'COCKTAIL - CAIPIROSKA', categoria: 'COCKTAIL', subcategoria: '6.00', preco: 6.00 },
+            { id: 18, nome: 'COCKTAIL - CAIPIBEIRÃO', categoria: 'COCKTAIL', subcategoria: '6.00', preco: 6.00 },
+            { id: 19, nome: 'COCKTAIL - CAIPIBLACK', categoria: 'COCKTAIL', subcategoria: '6.00', preco: 6.00 },
+            { id: 20, nome: 'COCKTAIL - CAIPIROL', categoria: 'COCKTAIL', subcategoria: '6.00', preco: 6.00 },
+            
+            { id: 21, nome: 'HOT DRINK - HOT WINE', categoria: 'HOT DRINK', subcategoria: '4.00', preco: 4.00 },
+            { id: 22, nome: 'HOT DRINK - IRISH COFFEE', categoria: 'HOT DRINK', subcategoria: '5.00', preco: 5.00 },
+            { id: 23, nome: 'HOT DRINK - HOT CHOCOLATE C/ RUM', categoria: 'HOT DRINK', subcategoria: '5.00', preco: 5.00 },
+            { id: 24, nome: 'HOT DRINK - COFFEE', categoria: 'HOT DRINK', subcategoria: '1.00', preco: 1.00 },
+            
+            { id: 25, nome: 'WINE CUP - WHITE', categoria: 'WINE CUP', subcategoria: '3.00', preco: 3.00 },
+            { id: 26, nome: 'WINE CUP - ROSE', categoria: 'WINE CUP', subcategoria: '3.00', preco: 3.00 },
+            { id: 27, nome: 'WINE CUP - RED', categoria: 'WINE CUP', subcategoria: '3.00', preco: 3.00 },
+            { id: 28, nome: 'WINE CUP - GREEN', categoria: 'WINE CUP', subcategoria: '3.00', preco: 3.00 },
+            
+            { id: 29, nome: 'PORT WINE CUP - WHITE/RUBY/TAWNY', categoria: 'PORT WINE CUP', subcategoria: '4.00', preco: 4.00 },
+            { id: 30, nome: 'PORT WINE CUP - PINK', categoria: 'PORT WINE CUP', subcategoria: '5.00', preco: 5.00 },
+            { id: 31, nome: 'PORT WINE CUP - RESERVE', categoria: 'PORT WINE CUP', subcategoria: '6.00', preco: 6.00 },
+            
+            { id: 32, nome: 'OTHER - WATER', categoria: 'OTHER', subcategoria: '1.50', preco: 1.50 },
+            { id: 33, nome: 'OTHER - SOFT DRINKS', categoria: 'OTHER', subcategoria: '2.00', preco: 2.00 },
         ],
         estoqueLojas: [
             { produtoId: 1, lojaId: 1, quantidade: 25 },
@@ -90,11 +124,14 @@
         ],
         vendas: [],
         carrinho: [],
+        filtroCategoriaVendas: 'todos', // 'todos' ou o nome da categoria
+        filtroSubcategoriaVendas: 'todos', // 'todos' ou o nome da subcategoria
         usuarios: {
             vendedor: { usuario: 'vendedor', senha: '123', nome: 'João Vendedor', nivel: 'vendedor', lojasPermitidas: [1, 2] },
             senior: { usuario: 'senior', senha: '123', nome: 'Maria Gerente', nivel: 'senior', lojasPermitidas: [1, 2, 3] }
         },
         relatorioPeriodo: 'mensal',
+        lojaFiltroRelatorio: 'todas', // 'todas' ou o ID da loja
         dataInicioFiltro: '',
         dataFimFiltro: '',
         modalProduto: {
@@ -108,6 +145,20 @@
         modalLoja: {
             aberto: false,
             dados: null
+        },
+        modalPagamento: { // MODAL ÚNICO DE PAGAMENTO (ESTILO SUPERMERCADO)
+            aberto: false,
+            total: 0,
+            forma: 'dinheiro', // 'dinheiro', 'cartao', 'misto', 'gorjeta'
+            valorRecebido: 0, // Usado para dinheiro e misto
+            valorCartao: 0, // Usado para misto
+            valorGorjeta: 0, // Usado para gorjeta
+            desconto: { tipo: 'valor', valor: 0 } // Novo estado para desconto: 'valor' ou 'porcentagem'
+        },
+        modalOpcoesProduto: { // NOVO MODAL PARA SELEÇÃO DE OPÇÕES DE PRODUTO
+            aberto: false,
+            produto: null,
+            quantidade: 1
         },
         // Estado para Notificações Toast
         toast: {
@@ -125,6 +176,11 @@
     // =========================================================
     // 2. FUNÇÕES DE UTILIDADE E AUXILIARES
     // =========================================================
+function setDesconto(tipo, valor) {
+    appState.modalPagamento.desconto.tipo = tipo;
+    appState.modalPagamento.desconto.valor = parseFloat(valor) || 0;
+    renderApp();
+}
 
     // NOVO: Função para alternar a Sidebar
     function toggleSidebar() {
@@ -178,7 +234,8 @@
             CheckCircle: `<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>`,
             AlertTriangle: `<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/>`,
             Info: `<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>`,
-            Menu: `<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>` // Novo ícone de menu
+            Menu: `<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>`, // Novo ícone de menu
+            Gift: `<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>`
         };
         const svgPath = icons[name] || '';
         return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}">${svgPath}</svg>`;
@@ -223,23 +280,52 @@
         renderApp();
     }
 
-    function selecionarLoja(lojaId) {
-        const loja = appState.lojas.find(l => l.id === lojaId);
-        if (loja && appState.usuarioLogado.lojasPermitidas.includes(loja.id)) {
-            appState.usuarioLogado.lojaSelecionada = loja;
-            appState.telaAtiva = 'vendas';
-            showToast(`Loja alterada para ${loja.nome}.`, 'info');
-        }
-        renderApp();
-    }
-
     function fazerLogout() {
-        showToast('Sessão encerrada com sucesso.', 'info');
         appState.usuarioLogado = null;
         appState.telaAtiva = 'login';
         appState.carrinho = [];
-        appState.sidebarOpen = false;
+        showToast('Você saiu do sistema.', 'info');
         renderApp();
+    }
+
+    function selecionarLoja(lojaId) {
+    const loja = appState.lojas.find(l => l.id === lojaId);
+    const user = appState.usuarioLogado;
+
+    if (!loja || !user) {
+        showToast('Erro ao selecionar loja.', 'error');
+        return;
+    }
+
+    if (user.nivel === 'vendedor' && !user.lojasPermitidas.includes(lojaId)) {
+        showToast('Você não tem permissão para esta loja.', 'error');
+        return;
+    }
+
+    appState.usuarioLogado = {
+        ...user,
+        lojaSelecionada: loja
+    };
+
+    appState.telaAtiva = 'vendas';
+
+    showToast(`Entrando na ${loja.nome}`, 'success');
+
+    renderApp();
+}
+
+
+    function getCategorias() {
+        // A categoria principal agora é o tipo de produto (SHOT, COCKTAIL, etc.)
+        const categorias = appState.produtos.map(p => p.categoria);
+        return [...new Set(categorias)].sort();
+    }
+
+    function getSubcategorias(categoria) {
+        const produtosDaCategoria = appState.produtos.filter(p => p.categoria === categoria);
+        const subcategorias = produtosDaCategoria.map(p => p.subcategoria).filter(s => s);
+        // A subcategoria agora é o preço
+        return [...new Set(subcategorias)].sort((a, b) => parseFloat(a) - parseFloat(b));
     }
 
     function mudarTela(novaTela) {
@@ -252,7 +338,7 @@
     // 4. FUNÇÕES DE VENDAS
     // =========================================================
 
-    function adicionarAoCarrinho(produtoId) {
+    function adicionarAoCarrinho(produtoId, quantidade = 1) {
         if (!appState.usuarioLogado || !appState.usuarioLogado.lojaSelecionada) {
             showToast('Por favor, selecione uma loja para iniciar as vendas.', 'error');
             return;
@@ -268,20 +354,23 @@
         }
 
         const itemExistente = appState.carrinho.find(item => item.id === produtoId);
+        const quantidadeAtual = itemExistente ? itemExistente.quantidade : 0;
+        const quantidadeDesejada = quantidadeAtual + quantidade;
+
+        if (quantidadeDesejada > estoqueAtual) {
+            showToast(`Estoque insuficiente! Máximo disponível: ${estoqueAtual}`, 'error');
+            return;
+        }
 
         if (itemExistente) {
-            if (itemExistente.quantidade + 1 > estoqueAtual) {
-                showToast('Estoque insuficiente para adicionar mais uma unidade!', 'error');
-                return;
-            }
-
             appState.carrinho = appState.carrinho.map(item =>
-                item.id === produtoId ? { ...item, quantidade: item.quantidade + 1 } : item
+                item.id === produtoId ? { ...item, quantidade: quantidadeDesejada } : item
             );
         } else {
-            appState.carrinho = [...appState.carrinho, { ...produto, quantidade: 1 }];
+            appState.carrinho = [...appState.carrinho, { ...produto, quantidade: quantidade }];
         }
-        // Não é necessário showToast, pois o carrinho é atualizado visualmente
+        
+        showToast(`${quantidade}x ${produto.nome} adicionado ao carrinho!`, 'success');
         renderApp();
     }
 
@@ -290,20 +379,37 @@
         renderApp();
     }
 
-    function finalizarVenda(formaPagamento) {
+    function finalizarVenda(formaPagamento, detalhesPagamento = {}) {
         if (appState.carrinho.length === 0) {
-            showToast('Carrinho vazio!', 'error');
+            showToast('O carrinho está vazio!', 'error');
             return;
         }
 
         const lojaSelecionada = appState.usuarioLogado.lojaSelecionada;
         if (!lojaSelecionada) {
-            showToast('Erro: Loja não selecionada.', 'error');
+            showToast('Erro: Selecione uma loja primeiro.', 'error');
             return;
         }
 
+        const totalOriginal = appState.carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
         const lojaId = lojaSelecionada.id;
-        const total = appState.carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+
+        // Calcula o total com desconto
+        let totalVenda = totalOriginal;
+        const { tipo: descTipo, valor: descValor } = appState.modalPagamento.desconto;
+        if (descValor > 0) {
+            if (descTipo === 'porcentagem') {
+                totalVenda = totalOriginal * (1 - descValor / 100);
+            } else { // tipo === 'valor'
+                totalVenda = totalOriginal - descValor;
+            }
+            if (totalVenda < 0) totalVenda = 0;
+        }
+
+        // Se for gorjeta, o total da venda é o total original + gorjeta
+        if (formaPagamento === 'gorjeta') {
+            totalVenda = totalOriginal + detalhesPagamento.gorjeta;
+        }
 
         // 1. DÁ BAIXA NO ESTOQUE DA LOJA CORRETA
         const novoEstoqueLojas = appState.estoqueLojas.map(itemEstoque => {
@@ -319,21 +425,44 @@
         });
 
         // 2. CRIA O REGISTRO DA VENDA
+        let formaPagamentoFinal = formaPagamento;
+        
+        if (formaPagamento.startsWith('cartao')) {
+            formaPagamentoFinal = formaPagamento === 'cartao_credito' ? 'Crédito' : 'Débito';
+        } else if (formaPagamento === 'dinheiro') {
+            formaPagamentoFinal = 'Dinheiro';
+        } else if (formaPagamento === 'misto') {
+            formaPagamentoFinal = `Misto`;
+        } else if (formaPagamento === 'gorjeta') {
+            formaPagamentoFinal = 'Gorjeta';
+        }
+
+        // Adiciona o desconto aos detalhes do pagamento
+        detalhesPagamento.desconto = appState.modalPagamento.desconto;
+
         const novaVenda = {
             id: appState.vendas.length + 1,
             data: new Date().toISOString(),
             itens: appState.carrinho,
-            total,
-            formaPagamento,
+            total: totalVenda,
+            formaPagamento: formaPagamentoFinal,
             vendedor: appState.usuarioLogado.nome,
-            loja: lojaSelecionada.nome
+            loja: lojaSelecionada.nome,
+            detalhesPagamento: detalhesPagamento // Adiciona detalhes para o relatório
         };
 
         appState.estoqueLojas = novoEstoqueLojas;
         appState.vendas = [...appState.vendas, novaVenda];
         appState.carrinho = [];
+        
+        fecharModalPagamento();
+        let mensagem = `Venda de ${formatCurrency(totalVenda)} finalizada com sucesso!`;
+        
+        if (detalhesPagamento.troco && detalhesPagamento.troco > 0) {
+            mensagem += ` Troco: ${formatCurrency(detalhesPagamento.troco)}.`;
+        }
 
-        showToast(`Venda de ${formatCurrency(total)} finalizada com sucesso!`, 'success');
+        showToast(mensagem, 'success');
         renderApp();
     }
 
@@ -346,8 +475,17 @@
         const agora = new Date();
         let vendasFiltradas = appState.vendas;
 
+        // 1. FILTRO POR LOJA
         if (appState.usuarioLogado.nivel === 'vendedor' && appState.usuarioLogado.lojaSelecionada) {
+            // Vendedor só vê a própria loja
             vendasFiltradas = vendasFiltradas.filter(v => v.loja === appState.usuarioLogado.lojaSelecionada.nome);
+        } else if (appState.usuarioLogado.nivel === 'senior' && appState.lojaFiltroRelatorio !== 'todas') {
+            // Senior pode filtrar por loja
+            const lojaId = parseInt(appState.lojaFiltroRelatorio);
+            const lojaSelecionada = appState.lojas.find(l => l.id === lojaId);
+            if (lojaSelecionada) {
+                vendasFiltradas = vendasFiltradas.filter(v => v.loja === lojaSelecionada.nome);
+            }
         }
 
         // Lógica de filtro por data (mantida)
@@ -381,12 +519,395 @@
         }
 
         const totalGeral = vendasFiltradas.reduce((sum, v) => sum + v.total, 0);
-        const totalCartao = vendasFiltradas.filter(v => v.formaPagamento === 'cartao')
-                                             .reduce((sum, v) => sum + v.total, 0);
-        const totalDinheiro = vendasFiltradas.filter(v => v.formaPagamento === 'dinheiro')
-                                             .reduce((sum, v) => sum + v.total, 0);
+        let totalCartao = 0;
+        let totalDinheiro = 0;
+        let totalGorjetas = 0;
 
-        return { vendasFiltradas, totalGeral, totalCartao, totalDinheiro, quantidade: vendasFiltradas.length };
+        vendasFiltradas.forEach(v => {
+            if (v.formaPagamento === 'Débito' || v.formaPagamento === 'Crédito') {
+                totalCartao += v.total;
+            } else if (v.formaPagamento === 'Dinheiro') {
+                totalDinheiro += v.total;
+            } else if (v.formaPagamento === 'Gorjeta') {
+                // Gorjetas são tratadas como dinheiro, mas separadas para o relatório
+                totalDinheiro += v.total - v.detalhesPagamento.gorjeta;
+                totalGorjetas += v.detalhesPagamento.gorjeta;
+            } else if (v.formaPagamento.startsWith('Misto')) {
+                // Para pagamento misto, somamos os valores detalhados
+                totalDinheiro += v.detalhesPagamento.dinheiro || 0;
+                totalCartao += v.detalhesPagamento.cartao || 0;
+            }
+        });
+
+        return { vendasFiltradas, totalGeral, totalCartao, totalDinheiro, totalGorjetas, quantidade: vendasFiltradas.length };
+    }
+
+    function setFiltroSubcategoriaVendas(subcategoria) {
+        appState.filtroSubcategoriaVendas = subcategoria;
+        renderApp();
+    }
+
+    function setFiltroCategoriaVendas(categoria) {
+        appState.filtroCategoriaVendas = categoria;
+        appState.filtroSubcategoriaVendas = 'todos'; // Reseta o filtro de subcategoria
+        renderApp();
+    }
+
+    function fecharModalMisto() {
+        appState.modalMisto = { aberto: false, total: 0, valorDinheiro: 0, valorCartao: 0 };
+        renderApp();
+    }
+
+    function atualizarModalMisto(tipo, valor) {
+        const total = appState.modalMisto.total;
+        let valorNumerico = parseFloat(valor) || 0;
+        
+        // Limita o valor ao total da venda
+        if (valorNumerico > total) {
+            valorNumerico = total;
+        }
+        
+        // Garante que o valor não seja negativo
+        if (valorNumerico < 0) {
+            valorNumerico = 0;
+        }
+
+        if (tipo === 'dinheiro') {
+            appState.modalMisto.valorDinheiro = valorNumerico;
+            // O valor do cartão é o restante para completar o total
+            appState.modalMisto.valorCartao = total - valorNumerico;
+        } else if (tipo === 'cartao') {
+            appState.modalMisto.valorCartao = valorNumerico;
+            // O valor do dinheiro é o restante para completar o total
+            appState.modalMisto.valorDinheiro = total - valorNumerico;
+        }
+        
+        // Arredonda para evitar problemas de ponto flutuante
+        appState.modalMisto.valorDinheiro = parseFloat(appState.modalMisto.valorDinheiro.toFixed(2));
+        appState.modalMisto.valorCartao = parseFloat(appState.modalMisto.valorCartao.toFixed(2));
+
+        renderApp();
+    }
+
+    function renderModalMisto() {
+        if (!appState.modalMisto.aberto) return '';
+
+        const { total, valorDinheiro, valorCartao } = appState.modalMisto;
+        const totalFormatado = formatCurrency(total);
+        const dinheiroFormatado = formatCurrency(valorDinheiro);
+        const cartaoFormatado = formatCurrency(valorCartao);
+
+        return `
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4" onclick="fecharModalMisto()">
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 transform transition-all duration-300 scale-100" onclick="event.stopPropagation()">
+                    <div class="flex justify-between items-center border-b pb-3 mb-4">
+                        <h3 class="text-2xl font-bold text-gray-800">Pagamento Misto</h3>
+                        <button onclick="fecharModalMisto()" class="text-gray-400 hover:text-gray-600">${getIcon('X', 'w-6 h-6')}</button>
+                    </div>
+
+                    <div class="text-center mb-6 p-4 bg-gray-50 rounded-lg">
+                        <p class="text-lg text-gray-600">Total a Pagar:</p>
+                        <p class="text-4xl font-extrabold text-green-600">${totalFormatado}</p>
+                    </div>
+
+                        <form onsubmit="event.preventDefault(); finalizarVenda('misto', { dinheiro: ${valorDinheiro}, cartao: ${valorCartao} }); fecharModalMisto();">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Valor em Dinheiro</label>
+                                <input type="number" step="0.01" min="0" max="${total.toFixed(2)}" value="${valorDinheiro.toFixed(2)}" onchange="atualizarModalMisto('dinheiro', this.value)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-lg font-semibold">
+                                <p class="mt-1 text-sm text-gray-500">Valor restante para Cartão: <span class="font-bold text-indigo-600">${formatCurrency(total - valorDinheiro)}</span></p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Valor em Cartão</label>
+                                <input type="number" step="0.01" min="0" max="${total.toFixed(2)}" value="${valorCartao.toFixed(2)}" onchange="atualizarModalMisto('cartao', this.value)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-lg font-semibold">
+                                <p class="mt-1 text-sm text-gray-500">Valor restante para Dinheiro: <span class="font-bold text-green-600">${formatCurrency(total - valorCartao)}</span></p>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="mt-6 w-full bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition text-lg">
+                            Finalizar Misto (${totalFormatado})
+                        </button>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
+    function abrirModalPagamento() {
+        const total = appState.carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+        appState.modalPagamento = { 
+            aberto: true, 
+            total, 
+            forma: 'dinheiro', 
+            valorRecebido: total, 
+            valorCartao: 0, 
+            valorGorjeta: 0,
+            desconto: appState.modalPagamento.desconto // Mantém o desconto
+        };
+        renderApp();
+    }
+
+   
+
+    function abrirModalOpcoesProduto(produtoId) {
+        const produto = appState.produtos.find(p => p.id === produtoId);
+        if (!produto) return;
+
+        appState.modalOpcoesProduto = {
+            aberto: true,
+            produto: produto,
+            quantidade: 1
+        };
+        renderApp();
+    }
+
+    function fecharModalOpcoesProduto() {
+        appState.modalOpcoesProduto = { aberto: false, produto: null, quantidade: 1 };
+        renderApp();
+    }
+
+    function atualizarQuantidadeModalOpcoes(novaQuantidade) {
+        appState.modalOpcoesProduto.quantidade = parseInt(novaQuantidade) || 1;
+        renderApp();
+    }
+
+    function renderModalOpcoesProduto() {
+        if (!appState.modalOpcoesProduto.aberto || !appState.modalOpcoesProduto.produto) return '';
+
+        const { produto, quantidade } = appState.modalOpcoesProduto;
+        const lojaId = appState.usuarioLogado.lojaSelecionada?.id || -1;
+        const estoque = getEstoqueLoja(produto.id, lojaId);
+        const totalItem = formatCurrency(produto.preco * quantidade);
+
+        return `
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4" onclick="fecharModalOpcoesProduto()">
+                <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 transform transition-all duration-300 scale-100" onclick="event.stopPropagation()">
+                    <div class="flex justify-between items-center border-b pb-3 mb-4">
+                        <h3 class="text-2xl font-bold text-gray-800">Opções de ${produto.nome}</h3>
+                        <button onclick="fecharModalOpcoesProduto()" class="text-gray-400 hover:text-gray-600">${getIcon('X', 'w-6 h-6')}</button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <span class="text-lg font-semibold text-gray-700">Preço Unitário:</span>
+                            <span class="text-xl font-bold text-green-600">${formatCurrency(produto.preco)}</span>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <label class="text-lg font-semibold text-gray-700" for="quantidadeInput">Quantidade:</label>
+                            <input type="number" id="quantidadeInput" min="1" max="${estoque}" value="${quantidade}" onchange="atualizarQuantidadeModalOpcoes(this.value)" class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-lg font-semibold text-center">
+                        </div>
+                        
+                        <div class="flex justify-between items-center p-3 border-t border-gray-200">
+                            <span class="text-xl font-bold text-gray-800">Total do Item:</span>
+                            <span class="text-2xl font-extrabold text-indigo-600">${totalItem}</span>
+                        </div>
+                    </div>
+
+                    <button onclick="adicionarAoCarrinho(${produto.id}, ${quantidade}); fecharModalOpcoesProduto();" ${quantidade > estoque || quantidade <= 0 ? 'disabled' : ''} class="mt-6 w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition ${quantidade > estoque || quantidade <= 0 ? 'opacity-50 cursor-not-allowed' : ''}">
+                        Adicionar ao Carrinho
+                    </button>
+                    ${quantidade > estoque ? `<p class="text-center text-sm text-red-500 mt-2">Estoque insuficiente. Máximo disponível: ${estoque}</p>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    function fecharModalPagamento() {
+        appState.modalPagamento = { 
+            aberto: false, total: 0, forma: 'dinheiro', 
+            valorRecebido: 0, valorCartao: 0, valorGorjeta: 0,
+            // Mantém o desconto ao fechar, mas pode ser resetado se preferir
+            desconto: { tipo: 'valor', valor: 0 } 
+        };
+        renderApp();
+    }
+
+    function setFormaPagamento(forma) {
+        appState.modalPagamento.forma = forma;
+        // Resetar valores ao mudar a forma
+        appState.modalPagamento.valorRecebido = appState.modalPagamento.total;
+        appState.modalPagamento.valorCartao = 0;
+        appState.modalPagamento.valorGorjeta = 0;
+        renderApp();
+    }
+
+    function atualizarValorPagamento(tipo, valor) {
+        let valorNumerico = parseFloat(valor) || 0;
+        const total = appState.modalPagamento.total;
+        
+        // Aplica o desconto para calcular o total real a pagar
+        let totalComDesconto = total;
+        if (appState.modalPagamento.desconto.valor > 0) {
+            const { tipo: descTipo, valor: descValor } = appState.modalPagamento.desconto;
+            if (descTipo === 'porcentagem') {
+                totalComDesconto = total * (1 - descValor / 100);
+            } else { // tipo === 'valor'
+                totalComDesconto = total - descValor;
+            }
+            if (totalComDesconto < 0) totalComDesconto = 0;
+        }
+
+        if (tipo === 'recebido') {
+            appState.modalPagamento.valorRecebido = valorNumerico;
+        } else if (tipo === 'cartao') {
+            appState.modalPagamento.valorCartao = valorNumerico;
+            // No misto, se mudar o cartão, ajusta o dinheiro
+            if (appState.modalPagamento.forma === 'misto') {
+                appState.modalPagamento.valorRecebido = totalComDesconto - valorNumerico;
+            }
+        } else if (tipo === 'gorjeta') {
+            appState.modalPagamento.valorGorjeta = valorNumerico;
+        }
+        renderApp();
+    }
+
+    function renderModalPagamento() {
+    if (!appState.modalPagamento.aberto) return '';
+
+    const { total, forma, valorRecebido, valorCartao, valorGorjeta, desconto } = appState.modalPagamento;
+
+    let totalComDesconto = total;
+    if (desconto.valor > 0) {
+        totalComDesconto =
+            desconto.tipo === 'porcentagem'
+                ? total * (1 - desconto.valor / 100)
+                : total - desconto.valor;
+        if (totalComDesconto < 0) totalComDesconto = 0;
+    }
+
+    let formContent = '';
+    let finalizarButton = '';
+    let troco = 0;
+    let totalPagar = totalComDesconto;
+    let dinheiroNecessario = totalComDesconto - valorCartao;
+    if (dinheiroNecessario < 0) dinheiroNecessario = 0;
+
+    if (forma === 'dinheiro') {
+        troco = valorRecebido > totalPagar ? valorRecebido - totalPagar : 0;
+
+        formContent = `
+            <label class="block text-sm font-medium mb-1">Valor Recebido</label>
+            <input type="number" step="0.01" value="${valorRecebido.toFixed(2)}"
+                onchange="atualizarValorPagamento('recebido', this.value)"
+                class="w-full px-3 py-2 border rounded-lg mb-3">
+
+            <p class="text-lg font-semibold">Troco: <span class="text-blue-600">${formatCurrency(troco)}</span></p>
+        `;
+
+        finalizarButton = `
+            <button onclick="finalizarVenda('dinheiro', { troco: ${troco} });"
+                ${valorRecebido < totalPagar ? 'disabled' : ''}
+                class="w-full bg-green-600 text-white py-3 rounded-lg font-bold ${valorRecebido < totalPagar ? 'opacity-50' : ''}">
+                Finalizar Dinheiro
+            </button>
+        `;
+    }
+
+    if (forma === 'cartao') {
+        finalizarButton = `
+            <button onclick="finalizarVenda('cartao_credito');"
+                class="w-full bg-purple-600 text-white py-3 rounded-lg font-bold mb-2">
+                Crédito
+            </button>
+            <button onclick="finalizarVenda('cartao_debito');"
+                class="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold">
+                Débito
+            </button>
+        `;
+    }
+
+    if (forma === 'misto') {
+        troco = valorRecebido > dinheiroNecessario ? valorRecebido - dinheiroNecessario : 0;
+
+        formContent = `
+            <label class="block text-sm font-medium mb-1">Valor no Cartão</label>
+            <input type="number" step="0.01" value="${valorCartao.toFixed(2)}"
+                onchange="atualizarValorPagamento('cartao', this.value)"
+                class="w-full px-3 py-2 border rounded-lg mb-3">
+
+            <p class="mb-2">Dinheiro Necessário: <b>${formatCurrency(dinheiroNecessario)}</b></p>
+
+            <label class="block text-sm font-medium mb-1">Valor Recebido</label>
+            <input type="number" step="0.01" value="${valorRecebido.toFixed(2)}"
+                onchange="atualizarValorPagamento('recebido', this.value)"
+                class="w-full px-3 py-2 border rounded-lg mb-3">
+
+            <p class="text-lg font-semibold">Troco: <span class="text-blue-600">${formatCurrency(troco)}</span></p>
+        `;
+
+        finalizarButton = `
+            <button onclick="finalizarVenda('misto', { dinheiro: ${dinheiroNecessario}, cartao: ${valorCartao}, troco: ${troco} });"
+                ${valorRecebido < dinheiroNecessario ? 'disabled' : ''}
+                class="w-full bg-orange-500 text-white py-3 rounded-lg font-bold ${valorRecebido < dinheiroNecessario ? 'opacity-50' : ''}">
+                Finalizar Misto
+            </button>
+        `;
+    }
+
+    if (forma === 'gorjeta') {
+        totalPagar = total + valorGorjeta;
+        troco = valorRecebido > totalPagar ? valorRecebido - totalPagar : 0;
+
+        formContent = `
+            <label class="block text-sm font-medium mb-1">Valor da Gorjeta</label>
+            <input type="number" step="0.01" value="${valorGorjeta.toFixed(2)}"
+                onchange="atualizarValorPagamento('gorjeta', this.value)"
+                class="w-full px-3 py-2 border rounded-lg mb-3">
+
+            <p class="mb-3">Total Final: <b>${formatCurrency(totalPagar)}</b></p>
+
+            <label class="block text-sm font-medium mb-1">Valor Recebido</label>
+            <input type="number" step="0.01" value="${valorRecebido.toFixed(2)}"
+                onchange="atualizarValorPagamento('recebido', this.value)"
+                class="w-full px-3 py-2 border rounded-lg mb-3">
+
+            <p class="text-lg font-semibold">Troco: <span class="text-blue-600">${formatCurrency(troco)}</span></p>
+        `;
+
+        finalizarButton = `
+            <button onclick="finalizarVenda('gorjeta', { gorjeta: ${valorGorjeta}, total: ${totalPagar}, troco: ${troco} });"
+                ${valorRecebido < totalPagar ? 'disabled' : ''}
+                class="w-full bg-yellow-500 text-gray-800 py-3 rounded-lg font-bold ${valorRecebido < totalPagar ? 'opacity-50' : ''}">
+                Finalizar Gorjeta
+            </button>
+        `;
+    }
+
+    return `
+        <div class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
+            <div class="bg-white rounded-xl p-6 w-full max-w-md relative">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold">Finalizar Venda</h3>
+                    <button onclick="fecharModalPagamento()" class="text-gray-400 hover:text-gray-600">
+                        ${getIcon('X', 'w-6 h-6')}
+                    </button>
+                </div>
+
+                <div class="mb-4">
+                    <p>Total Original: <b>${formatCurrency(total)}</b></p>
+                    <p>Total com Desconto: <b class="text-red-600">${formatCurrency(totalComDesconto)}</b></p>
+                </div>
+
+                <div class="flex gap-2 mb-4">
+                    <button onclick="setFormaPagamento('dinheiro')" class="px-3 py-2 bg-gray-200 rounded">Dinheiro</button>
+                    <button onclick="setFormaPagamento('cartao')" class="px-3 py-2 bg-gray-200 rounded">Cartão</button>
+                    <button onclick="setFormaPagamento('misto')" class="px-3 py-2 bg-gray-200 rounded">Misto</button>
+                    <button onclick="setFormaPagamento('gorjeta')" class="px-3 py-2 bg-gray-200 rounded">Gorjeta</button>
+                </div>
+
+                ${formContent}
+                ${finalizarButton}
+            </div>
+        </div>
+    `;
+}
+
+
+    function setLojaFiltroRelatorio(lojaId) {
+        appState.lojaFiltroRelatorio = lojaId;
+        renderApp();
     }
 
     function setRelatorioPeriodo(periodo) {
@@ -456,11 +977,12 @@
         event.preventDefault();
         const form = event.target;
         const nome = form.querySelector('#prodNome').value;
-        const categoria = form.querySelector('#prodCategoria').value;
-        const preco = parseFloat(form.querySelector('#prodPreco').value);
+        const categoria = form.querySelector('#prodCategoria').value.toUpperCase(); // Garante maiúsculas para o tipo
+        const subcategoria = form.querySelector('#prodSubcategoria').value;
+        const preco = parseFloat(subcategoria); // O preço é o mesmo da subcategoria
         
-        if (!nome || preco < 0 || isNaN(preco)) {
-            showToast('Preencha os dados básicos corretamente.', 'error');
+        if (!nome || preco < 0 || isNaN(preco) || !categoria || !subcategoria) {
+            showToast('Preencha os dados básicos corretamente. O preço é definido pela subcategoria.', 'error');
             return;
         }
 
@@ -474,13 +996,13 @@
             produtoId = appState.modalProduto.dados.id;
             appState.produtos = appState.produtos.map(p =>
                 p.id === produtoId
-                ? { ...p, nome, categoria, preco }
+                ? { ...p, nome, categoria, subcategoria, preco }
                 : p
             );
         } else {
             // Novo Produto
             produtoId = appState.produtos.length > 0 ? Math.max(...appState.produtos.map(p => p.id)) + 1 : 1;
-            const novoProduto = { id: produtoId, nome, categoria, preco };
+            const novoProduto = { id: produtoId, nome, categoria, subcategoria, preco };
             appState.produtos.push(novoProduto);
         }
 
@@ -800,7 +1322,8 @@
         // Estrutura de navegação para Admin e Vendedor
         const navItems = [
             { id: 'dashboard', label: 'Dashboard', icon: 'TrendingUp', roles: ['senior'] },
-            { id: 'vendas', label: 'Vendas', icon: 'ShoppingCart', roles: ['vendedor'] },
+            { id: 'vendas', label: 'Vendas', icon: 'ShoppingCart', roles: ['vendedor', 'senior'] },
+
             { id: 'relatorio', label: 'Relatório', icon: 'FileText', roles: ['vendedor', 'senior'] },
             { id: 'estoque', label: 'Produtos/Estoque', icon: 'Package', roles: ['senior'] },
             { id: 'usuarios', label: 'Usuários', icon: 'Users', roles: ['senior'] },
@@ -968,94 +1491,135 @@
     };
 
     const renderVendas = () => {
-        // Classes para a Vendas (Grid de duas colunas, empilhando em mobile)
-        const gridClass = "grid grid-cols-1 lg:grid-cols-3 gap-6 p-4 md:p-8";
-        const produtosClass = "lg:col-span-2";
-        const carrinhoClass = "lg:col-span-1";
+        if (!appState.usuarioLogado || !appState.usuarioLogado.lojaSelecionada) {
+            return renderSelecaoLoja();
+        }
 
-        const produtosComEstoque = appState.produtos.map(p => ({
+        const lojaId = appState.usuarioLogado.lojaSelecionada.id;
+        const carrinhoTotal = appState.carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+        
+        // A categoria principal agora é o TIPO de produto (SHOT, COCKTAIL, etc.)
+        const categorias = getCategorias(); 
+        
+        // Filtra os produtos com base na categoria e subcategoria selecionadas
+        let produtosFiltrados = appState.produtos.filter(p => {
+            const categoriaMatch = appState.filtroCategoriaVendas === 'todos' || p.categoria === appState.filtroCategoriaVendas;
+            const subcategoriaMatch = appState.filtroSubcategoriaVendas === 'todos' || p.subcategoria === appState.filtroSubcategoriaVendas;
+            return categoriaMatch && subcategoriaMatch;
+        });
+
+        // Subcategorias são os PREÇOS dos produtos filtrados
+        const subcategorias = [...new Set(produtosFiltrados.map(p => p.subcategoria).filter(s => s))].sort((a, b) => parseFloat(a) - parseFloat(b));
+
+        // Adiciona o estoque para renderização
+        let produtosComEstoque = produtosFiltrados.map(p => ({
             ...p,
-            estoque: getEstoqueLoja(p.id, appState.usuarioLogado.lojaSelecionada?.id || -1)
+            estoque: getEstoqueLoja(p.id, lojaId)
         }));
 
-        const carrinhoTotal = appState.carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+        // HTML para os botões de filtro de categoria (Tipo de Produto)
+        const filtroCategoriaHTML = `
+            <div class="flex space-x-2 overflow-x-auto pb-2 mb-4">
+                <button onclick="setFiltroCategoriaVendas('todos');" class="px-4 py-2 rounded-full text-sm font-medium transition ${appState.filtroCategoriaVendas === 'todos' ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">
+                    Todos os Tipos
+                </button>
+                ${categorias.map(cat => `
+                    <button onclick="setFiltroCategoriaVendas('${cat}');" class="px-4 py-2 rounded-full text-sm font-medium transition whitespace-nowrap ${appState.filtroCategoriaVendas === cat ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">
+                        ${cat}
+                    </button>
+                `).join('')}
+            </div>
+        `;
+
+        // HTML para os botões de filtro de subcategoria (Preço)
+        const filtroSubcategoriaHTML = appState.filtroCategoriaVendas !== 'todos' ? `
+            <div class="flex flex-wrap gap-2 pb-2 mb-4 border-t pt-4 mt-4">
+                <span class="text-sm font-medium text-gray-700 py-2 whitespace-nowrap">Filtrar por Preço:</span>
+                <button onclick="setFiltroSubcategoriaVendas('todos');" class="px-4 py-2 rounded-full text-sm font-medium transition ${appState.filtroSubcategoriaVendas === 'todos' ? 'bg-green-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">
+                    Todos os Preços
+                </button>
+                ${subcategorias.map(subcat => `
+                    <button onclick="setFiltroSubcategoriaVendas('${subcat}');" class="px-4 py-2 rounded-full text-sm font-medium transition whitespace-nowrap ${appState.filtroSubcategoriaVendas === subcat ? 'bg-green-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">
+                        ${formatCurrency(parseFloat(subcat))}
+                    </button>
+                `).join('')}
+            </div>
+        ` : '';
+
+        // HTML para a lista de produtos
+        const produtosHTML = produtosComEstoque.map(produto => {
+            const isEsgotado = produto.estoque === 0;
+            const nomeProduto = produto.nome.split(' - ').length > 1 ? produto.nome.split(' - ')[1] : produto.nome; // Exibe apenas o nome do produto
+
+            return `
+                <button onclick="abrirModalOpcoesProduto(${produto.id})" ${isEsgotado ? 'disabled' : ''} class="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition transform hover:scale-[1.02] ${isEsgotado ? 'opacity-50 cursor-not-allowed' : ''}">
+                    <div class="flex justify-between items-start">
+                        <span class="text-lg font-semibold text-gray-800 text-left">${nomeProduto}</span>
+                        <span class="text-xl font-bold text-indigo-600">${formatCurrency(produto.preco)}</span>
+                    </div>
+                    <div class="mt-2 text-left">
+                        <span class="text-xs font-medium text-gray-500">Estoque: ${produto.estoque}</span>
+                    </div>
+                </button>
+            `;
+        }).join('');
+
+        // HTML para o carrinho
+        const carrinhoHTML = appState.carrinho.map(item => `
+            <div class="flex justify-between items-center py-2 border-b last:border-b-0">
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-800">${item.nome}</p>
+                    <p class="text-xs text-gray-500">${formatCurrency(item.preco)} x ${item.quantidade}</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm font-semibold text-gray-700">${formatCurrency(item.preco * item.quantidade)}</span>
+                    <button onclick="removerDoCarrinho(${item.id})" class="text-red-500 hover:text-red-700 transition">
+                        ${getIcon('Trash2', 'w-4 h-4')}
+                    </button>
+                </div>
+            </div>
+        `).join('');
 
         return renderBaseLayout('Vendas em ' + (appState.usuarioLogado.lojaSelecionada?.nome || 'Loja Não Selecionada'), `
-            <div class="${gridClass}">
-                <div class="${produtosClass}">
-                    <div class="bg-white p-6 rounded-xl shadow-lg">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Catálogo de Produtos</h2>
-                        
-                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                            ${produtosComEstoque.map(p => `
-                                <button onclick="adicionarAoCarrinho(${p.id})" ${p.estoque === 0 ? 'disabled' : ''} class="w-full text-left p-4 border rounded-lg transition-all duration-200 ${p.estoque > 0 ? 'bg-white hover:bg-gray-50 border-gray-300' : 'bg-red-100 border-red-300 cursor-not-allowed opacity-70'}">
-                                    <div class="text-lg font-semibold text-gray-900 truncate">${p.nome}</div>
-                                    <div class="flex justify-between items-center mt-1">
-                                        <span class="text-blue-600 font-bold">${formatCurrency(p.preco)}</span>
-                                        <span class="text-sm ${p.estoque > 5 ? 'text-green-600' : p.estoque > 0 ? 'text-yellow-600' : 'text-red-600'} font-medium">
-                                            ${p.estoque > 0 ? `Estoque: ${p.estoque}` : 'Esgotado'}
-                                        </span>
-                                    </div>
-                                </button>
-                            `).join('')}
-                        </div>
+            <div class="flex h-full">
+                <!-- Coluna de Produtos -->
+                <div class="flex-1 p-4 overflow-y-auto">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Produtos Disponíveis</h2>
+                    
+                    ${filtroCategoriaHTML}
+                    ${filtroSubcategoriaHTML}
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        ${produtosHTML.length > 0 ? produtosHTML : '<p class="text-gray-500 col-span-full">Nenhum produto encontrado para a seleção.</p>'}
                     </div>
                 </div>
 
-                <div class="${carrinhoClass} sticky top-4">
-                    <div class="bg-white p-6 rounded-xl shadow-lg">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-between">
-                            <span>Carrinho</span>
-                            ${getIcon('ShoppingCart', 'w-6 h-6 text-blue-500')}
-                        </h2>
+                <!-- Coluna do Carrinho -->
+                <div class="w-full md:w-80 bg-gray-50 border-l p-4 flex flex-col">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Carrinho</h2>
+                    
+                    <div class="flex-1 overflow-y-auto space-y-2">
+                        ${carrinhoHTML.length > 0 ? carrinhoHTML : '<p class="text-gray-500 text-sm">O carrinho está vazio.</p>'}
+                    </div>
 
-                        ${appState.carrinho.length === 0 ? `
-                            <p class="text-gray-500 italic text-center py-4">O carrinho está vazio.</p>
-                        ` : `
-                            <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
-                                ${appState.carrinho.map(item => `
-                                    <div class="flex items-center justify-between border-b pb-2">
-                                        <div>
-                                            <p class="font-medium text-gray-900">${item.nome}</p>
-                                            <p class="text-sm text-gray-500">${item.quantidade} x ${formatCurrency(item.preco)}</p>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <span class="font-bold text-green-600">${formatCurrency(item.preco * item.quantidade)}</span>
-                                            <button onclick="removerDoCarrinho(${item.id})" class="text-red-500 hover:text-red-700 p-1">
-                                                ${getIcon('Trash2', 'w-4 h-4')}
-                                            </button>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `}
-
-                        <div class="mt-4 pt-4 border-t border-gray-200">
-                            <div class="flex justify-between items-center mb-4">
-                                <span class="text-xl font-semibold text-gray-800">Total:</span>
-                                <span class="text-2xl font-bold text-green-700">${formatCurrency(carrinhoTotal)}</span>
-                            </div>
-
-                            <p class="text-sm font-medium text-gray-700 mb-2">Forma de Pagamento:</p>
-                            
-                            <div class="space-y-3">
-                                <button onclick="finalizarVenda('dinheiro')" ${appState.carrinho.length === 0 ? 'disabled' : ''} class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition ${appState.carrinho.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}">
-                                    Finalizar (Dinheiro)
-                                </button>
-                                <button onclick="finalizarVenda('cartao')" ${appState.carrinho.length === 0 ? 'disabled' : ''} class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition ${appState.carrinho.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}">
-                                    Finalizar (Cartão)
-                                </button>
-                            </div>
+                    <div class="mt-4 pt-4 border-t">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-xl font-semibold text-gray-800">Total:</span>
+                            <span class="text-2xl font-bold text-green-600">${formatCurrency(carrinhoTotal)}</span>
                         </div>
-
+                        <button onclick="abrirModalPagamento()" ${appState.carrinho.length === 0 ? 'disabled' : ''} class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition ${appState.carrinho.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}">
+                            Finalizar Venda
+                        </button>
                     </div>
                 </div>
             </div>
-        `, true);
-    };
-
-    const renderRelatorio = () => {
-        const { vendasFiltradas, totalGeral, totalCartao, totalDinheiro, quantidade } = calcularRelatorio(appState.relatorioPeriodo);
+            ${renderModalPagamento()}
+            ${renderModalOpcoesProduto()}
+	        `, true);
+	    };
+	
+	    const renderRelatorio = () => {
+        const { vendasFiltradas, totalGeral, totalCartao, totalDinheiro, totalGorjetas, quantidade } = calcularRelatorio(appState.relatorioPeriodo);
         const isAdmin = appState.usuarioLogado.nivel === 'senior';
 
         // Grid responsivo para cards
@@ -1066,6 +1630,7 @@
             { icon: 'DollarSign', title: 'Total Geral', value: formatCurrency(totalGeral), color: 'bg-green-500', iconColor: 'text-green-100' },
             { icon: 'Wallet', title: 'Total Dinheiro', value: formatCurrency(totalDinheiro), color: 'bg-yellow-500', iconColor: 'text-yellow-100' },
             { icon: 'CreditCard', title: 'Total Cartão', value: formatCurrency(totalCartao), color: 'bg-indigo-500', iconColor: 'text-indigo-100' },
+            { icon: 'Gift', title: 'Total Gorjetas', value: formatCurrency(totalGorjetas), color: 'bg-pink-500', iconColor: 'text-pink-100' },
         ];
         
         return renderBaseLayout('Relatório de Vendas', `
@@ -1073,7 +1638,19 @@
                 <h2 class="text-3xl font-bold text-gray-800 mb-6 hidden md:block">Relatório Detalhado</h2>
 
                 <div class="bg-white p-4 rounded-xl shadow-lg mb-6">
-                    <h3 class="text-lg font-semibold mb-3">Filtro por Período</h3>
+	                    <h3 class="text-lg font-semibold mb-3">Filtro por Período</h3>
+	                    
+	                    ${isAdmin ? `
+	                    <div class="mb-4">
+	                        <label class="block text-sm font-medium text-gray-700 mb-1" for="lojaFiltro">Filtrar por Loja</label>
+	                        <select id="lojaFiltro" onchange="setLojaFiltroRelatorio(this.value)" class="w-full sm:w-1/2 md:w-1/3 px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+	                            <option value="todas" ${appState.lojaFiltroRelatorio === 'todas' ? 'selected' : ''}>Todas as Lojas</option>
+	                            ${appState.lojas.map(loja => `
+	                                <option value="${loja.id}" ${appState.lojaFiltroRelatorio == loja.id ? 'selected' : ''}>${loja.nome}</option>
+	                            `).join('')}
+	                        </select>
+	                    </div>
+	                    ` : ''}
                     
                     <div class="flex flex-wrap gap-2 mb-4">
                         <button onclick="setRelatorioPeriodo('diario')" class="px-4 py-2 text-sm rounded-lg transition ${appState.relatorioPeriodo === 'diario' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">Diário</button>
@@ -1312,64 +1889,137 @@
     
     // RENDERIZAÇÃO DE MODAIS (MELHORADA PARA RESPONSIVIDADE)
     const renderModalProduto = () => {
-        if (!appState.modalProduto.aberto || !appState.modalProduto.dados) return '';
-        const dados = appState.modalProduto.dados;
-        const isNew = dados.novoProduto;
+    if (!appState.modalProduto.aberto || !appState.modalProduto.dados) return '';
 
-        // Adiciona classes para tornar o modal scrollável em telas pequenas
-        return `
-            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onclick="if(event.target === this) fecharModalProduto()">
-                <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl max-h-screen overflow-y-auto transform transition-all duration-300">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4 border-b pb-3">
-                            <h3 class="text-2xl font-bold text-gray-800">${isNew ? 'Adicionar Novo Produto' : `Editar Produto: ${dados.nome}`}</h3>
-                            <button onclick="fecharModalProduto()" class="text-gray-400 hover:text-gray-600 transition">
-                                ${getIcon('X', 'w-6 h-6')}
+    const dados = appState.modalProduto.dados;
+    const isNew = dados.novoProduto;
+
+    return `
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+             onclick="if(event.target === this) fecharModalProduto()">
+
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl max-h-screen overflow-y-auto">
+
+                <div class="p-6">
+                    <!-- Header -->
+                    <div class="flex justify-between items-center mb-4 border-b pb-3">
+                        <h3 class="text-2xl font-bold text-gray-800">
+                            ${isNew ? 'Adicionar Novo Produto' : `Editar Produto: ${dados.nome}`}
+                        </h3>
+                        <button onclick="fecharModalProduto()" class="text-gray-400 hover:text-gray-600">
+                            ${getIcon('X', 'w-6 h-6')}
+                        </button>
+                    </div>
+
+                    <!-- FORM -->
+                    <form onsubmit="salvarProduto(event)">
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                            <!-- Nome -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Produto</label>
+                                <input
+                                    type="text"
+                                    id="prodNome"
+                                    value="${dados.nome}"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    required
+                                >
+                            </div>
+
+                            <!-- Categoria -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                                <input
+                                    type="text"
+                                    id="prodCategoria"
+                                    value="${dados.categoria || ''}"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    placeholder="Ex: SHOT, COCKTAIL"
+                                    required
+                                >
+                            </div>
+
+                            <!-- Subcategoria (Preço) -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Subcategoria (Preço)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    id="prodSubcategoria"
+                                    value="${dados.subcategoria}"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    placeholder="Ex: 3.00"
+                                    required
+                                >
+                            </div>
+
+                            <!-- Preço calculado -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Preço (definido pela subcategoria)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value="${Number(dados.preco).toFixed(2)}"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100"
+                                    readonly
+                                >
+                            </div>
+
+                        </div>
+
+                        <!-- ESTOQUE POR LOJA -->
+                        <h4 class="text-lg font-semibold text-gray-800 mt-6 mb-3 border-t pt-4">
+                            Estoque por Loja
+                        </h4>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${appState.lojas.map(loja => `
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        ${loja.nome}
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value="${dados.estoqueDetalhe[loja.id] || 0}"
+                                        oninput="atualizarEstoqueModal(${loja.id}, this.value)"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    >
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- BOTÕES -->
+                        <div class="mt-6 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onclick="fecharModalProduto()"
+                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700"
+                            >
+                                ${isNew ? 'Adicionar Produto' : 'Salvar Alterações'}
                             </button>
                         </div>
 
-                        <form onsubmit="salvarProduto(event)">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700" for="prodNome">Nome</label>
-                                    <input type="text" id="prodNome" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500" value="${dados.nome}" required>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700" for="prodPreco">Preço (Eur)</label>
-                                    <input type="number" step="0.01" id="prodPreco" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500" value="${dados.preco}" required>
-                                </div>
-                                <div class="col-span-1 md:col-span-2">
-                                    <label class="block text-sm font-medium text-gray-700" for="prodCategoria">Categoria</label>
-                                    <select id="prodCategoria" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="bebidas" ${dados.categoria === 'bebidas' ? 'selected' : ''}>Bebidas</option>
-                                        <option value="cardapio" ${dados.categoria === 'cardapio' ? 'selected' : ''}>Cardápio</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <h4 class="text-lg font-semibold text-gray-800 mt-6 mb-3 border-t pt-3">Estoque por Loja</h4>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                ${appState.lojas.map(loja => `
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700" for="estoque-${loja.id}">${loja.nome}</label>
-                                        <input type="number" min="0" id="estoque-${loja.id}" oninput="atualizarEstoqueModal(${loja.id}, this.value)" class="w-full px-3 py-2 border border-gray-300 rounded-lg mt-1 focus:ring-blue-500 focus:border-blue-500" value="${dados.estoqueDetalhe[loja.id] || 0}" required>
-                                    </div>
-                                `).join('')}
-                            </div>
-                            
-                            <div class="mt-6 flex justify-end space-x-3">
-                                <button type="button" onclick="fecharModalProduto()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">Cancelar</button>
-                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">
-                                    ${isNew ? 'Adicionar' : 'Salvar Alterações'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                    </form>
                 </div>
             </div>
-        `;
-    };
+        </div>
+    `;
+};
+
 
     const renderModalUsuario = () => {
         if (!appState.modalUsuario.aberto || !appState.modalUsuario.dados) return '';
